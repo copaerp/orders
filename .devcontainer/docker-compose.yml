@@ -1,0 +1,9 @@
+name: copaerp-orders
+version: '3.8'
+services:
+  devcontainer:
+    container_name: copaerp-orders-devcontainer
+    image: mcr.microsoft.com/devcontainers/base:bullseye
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity

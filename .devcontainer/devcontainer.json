@@ -1,0 +1,22 @@
+{
+	"name": "copaerp-orders",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "devcontainer",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"features": {
+		"ghcr.io/devcontainers/features/go:1": {
+			"version": "1.24.2"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"golang.Go"
+			],
+			"settings": {
+				"go.toolsManagement.autoUpdate": true
+			}
+		}
+	}
+}
