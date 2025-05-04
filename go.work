@@ -1,0 +1,8 @@
+go 1.24.2
+
+use (
+	./functions/channel-dispatcher
+	./functions/frontend-bridge
+	./functions/message-standardizer
+	./shared
+)
