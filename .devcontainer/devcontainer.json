@@ -11,6 +11,7 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
+				"GitHub.vscode-github-actions",
 				"ms-azuretools.vscode-docker",
 				"golang.Go"
 			],

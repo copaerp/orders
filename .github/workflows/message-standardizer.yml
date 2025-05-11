@@ -1,0 +1,46 @@
+name: message-standardizer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/message-standardizer.yml'
+      - 'functions/message-standardizer/**'
+      - 'functions/shared/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FUNCTION_NAME: message-standardizer
+      ZIP_FILE: bootstrap.zip
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.2'
+
+      - name: Build Go binary for Lambda
+        run: |
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o bootstrap main.go
+          zip $ZIP_FILE bootstrap
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: "us-east-1"
+
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --zip-file fileb://$ZIP_FILE
