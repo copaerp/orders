@@ -19,8 +19,8 @@ type Order struct {
 	FinishedAt    *time.Time
 	CanceledAt    *time.Time
 
-	Customer       Customer
-	Unit           Unit
-	Channel        Channel
+	Customer       Customer `gorm:"foreignKey:CustomerID"`
+	Unit           Unit     `gorm:"foreignKey:UnitID"`
+	Channel        Channel  `gorm:"foreignKey:ChannelID"`
 	ProductsOrders []ProductOrder
 }

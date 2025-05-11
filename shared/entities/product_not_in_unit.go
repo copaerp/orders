@@ -13,6 +13,6 @@ type ProductNotInUnit struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Product Product
-	Unit    Unit
+	Product Product `gorm:"foreignKey:ProductID"`
+	Unit    Unit    `gorm:"foreignKey:UnitID"`
 }
