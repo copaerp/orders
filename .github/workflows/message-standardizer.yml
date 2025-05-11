@@ -30,7 +30,7 @@ jobs:
         run: |
           cd functions/message-standardizer
           GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o bootstrap main.go
-          zip $ZIP_FILE bootstrap
+          zip ../../$ZIP_FILE bootstrap
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
