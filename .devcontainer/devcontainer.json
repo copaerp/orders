@@ -13,7 +13,8 @@
 			"extensions": [
 				"GitHub.vscode-github-actions",
 				"ms-azuretools.vscode-docker",
-				"golang.Go"
+				"golang.Go",
+				"Postman.postman-for-vscode"
 			],
 			"settings": {
 				"go.toolsManagement.autoUpdate": true
