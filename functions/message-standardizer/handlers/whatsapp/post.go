@@ -7,11 +7,10 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 )
-
-const n8nWebhookURL = "https://n8n.copaerp.site/webhook/aba98742-debe-4f62-a283-55519635318b"
 
 type WhatsAppMessage struct {
 	Entry []struct {
@@ -48,7 +47,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 			}
 			jsonData, _ := json.Marshal(outgoing)
 
-			resp, err := http.Post(n8nWebhookURL, "application/json", bytes.NewBuffer(jsonData))
+			resp, err := http.Post(os.Getenv("n8n_webhook_url"), "application/json", bytes.NewBuffer(jsonData))
 			if err != nil {
 				log.Printf("Erro ao enviar para n8n: %v", err)
 			} else {

@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -26,7 +27,7 @@ func NewRouter() *Router {
 func (r *Router) Add(method, path string, handler HandlerFunc) {
 	r.routes = append(r.routes, Route{
 		Method:  method,
-		Path:    path,
+		Path:    "/" + os.Getenv("environment") + path,
 		Handler: handler,
 	})
 }
