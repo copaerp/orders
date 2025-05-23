@@ -28,6 +28,13 @@ type WhatsAppMessage struct {
 }
 
 func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+
+	log.Println("all whatsapp raw data: ", request.Body)
+	log.Println("all whatsapp raw headers: ", request.Headers)
+	log.Println("all whatsapp raw query: ", request.QueryStringParameters)
+	log.Println("all whatsapp raw path: ", request.Path)
+	log.Println("all whatsapp raw method: ", request.HTTPMethod)
+
 	var payload WhatsAppMessage
 	err := json.Unmarshal([]byte(request.Body), &payload)
 	if err != nil {
@@ -44,6 +51,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 			outgoing := map[string]string{
 				"number":  number,
 				"message": message,
+				"channel": "whatsapp",
 			}
 			jsonData, _ := json.Marshal(outgoing)
 
