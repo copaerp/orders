@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -19,6 +20,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 
 	handler, found := router.Find(request.HTTPMethod, request.Path)
 	if !found {
+		log.Println("Route not found:", request.HTTPMethod, request.Path)
 		return events.APIGatewayProxyResponse{
 			StatusCode: 404,
 			Body:       fmt.Sprintf("Route not found: %s %s", request.HTTPMethod, request.Path),
