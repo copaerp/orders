@@ -22,7 +22,7 @@ type Unit struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 
-	Business           Business `gorm:"foreignKey:BusinessID"`
-	ProductsNotInUnits []ProductNotInUnit
-	Orders             []Order
+	Business        *Business `gorm:"foreignKey:BusinessID"`
+	ProductsInUnits []ProductInUnit
+	Orders          []Order
 }

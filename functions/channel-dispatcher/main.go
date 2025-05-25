@@ -26,7 +26,6 @@ func handler(request RequestMessage) error {
 		err := whatsappClient.SendMessage(request.Number, request.Message)
 
 		return err
-
 	default:
 		log.Printf("Channel %s not supported", request.Channel)
 		return fmt.Errorf("channel %s not supported", request.Channel)

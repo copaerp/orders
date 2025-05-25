@@ -17,7 +17,7 @@ type Product struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 
-	Business           Business `gorm:"foreignKey:BusinessID"`
-	ProductsNotInUnits []ProductNotInUnit
-	ProductsOrders     []ProductOrder
+	Business        *Business `gorm:"foreignKey:BusinessID"`
+	ProductsInUnits []ProductInUnit
+	ProductsOrders  []ProductOrder
 }

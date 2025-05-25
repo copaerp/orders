@@ -14,6 +14,6 @@ type ProductOrder struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Product Product `gorm:"foreignKey:ProductID"`
-	Order   Order   `gorm:"foreignKey:OrderID"`
+	Product *Product `gorm:"foreignKey:ProductID"`
+	Order   *Order   `gorm:"foreignKey:OrderID"`
 }
