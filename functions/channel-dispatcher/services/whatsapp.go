@@ -18,20 +18,15 @@ func NewWhatsAppService(token string) *WhatsAppService {
 	}
 }
 
-type WhatsAppMessageTemplateLanguage struct {
-	Code string `json:"code"`
-}
-
-type WhatsAppMessageTemplate struct {
-	Name     string `json:"name"`
-	Language WhatsAppMessageTemplateLanguage
+type WhatsAppMessageText struct {
+	Body string `json:"body"`
 }
 
 type WhatsAppMessage struct {
 	MessagingProduct string `json:"messaging_product"`
 	To               string `json:"to"`
 	Type             string `json:"type"`
-	Template         WhatsAppMessageTemplate
+	Text             WhatsAppMessageText
 }
 
 func (w *WhatsAppService) SendMessage(to, message string) error {
@@ -39,12 +34,9 @@ func (w *WhatsAppService) SendMessage(to, message string) error {
 	whatsappMessage := WhatsAppMessage{
 		MessagingProduct: "whatsapp",
 		To:               to,
-		Type:             "template",
-		Template: WhatsAppMessageTemplate{
-			Name: "hello_world",
-			Language: WhatsAppMessageTemplateLanguage{
-				Code: "en_US",
-			},
+		Type:             "text",
+		Text: WhatsAppMessageText{
+			Body: message,
 		},
 	}
 

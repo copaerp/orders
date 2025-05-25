@@ -18,7 +18,6 @@ var whatsappToken string
 
 func handler(request RequestMessage) error {
 
-	log.Println("Eureka")
 	log.Printf("message to be sent: %s, number: %s, channel: %s", request.Message, request.Number, request.Channel)
 
 	switch request.Channel {
