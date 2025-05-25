@@ -30,7 +30,7 @@ jobs:
       - name: Build Go binary for Lambda
         run: |
           cd functions/channel-dispatcher
-          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o bootstrap main.go
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w -X main.whatsappToken=${{ secrets.WHATSAPP_TOKEN }}" -o bootstrap main.go
           zip ../../$ZIP_FILE bootstrap
 
       - name: Configure AWS credentials
