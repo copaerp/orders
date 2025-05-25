@@ -23,10 +23,10 @@ type WhatsAppMessageText struct {
 }
 
 type WhatsAppMessage struct {
-	MessagingProduct string `json:"messaging_product"`
-	To               string `json:"to"`
-	Type             string `json:"type"`
-	Text             WhatsAppMessageText
+	MessagingProduct string              `json:"messaging_product"`
+	To               string              `json:"to"`
+	Type             string              `json:"type"`
+	Text             WhatsAppMessageText `json:"text"`
 }
 
 func (w *WhatsAppService) SendMessage(to, message string) error {
@@ -61,7 +61,7 @@ func (w *WhatsAppService) SendMessage(to, message string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("WhatsApp API returned non-success status code: %d", resp.StatusCode)
+		return fmt.Errorf("WhatsApp API returned non-success status code: %d with message %v", resp.StatusCode, err)
 	}
 
 	return nil
