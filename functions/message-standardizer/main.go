@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/copaerp/orders/functions/message-standardizer/handlers/whatsapp"
-	"github.com/copaerp/orders/functions/message-standardizer/services"
+	"github.com/copaerp/orders/shared/services"
 )
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

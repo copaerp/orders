@@ -13,10 +13,8 @@ func Get(ctx context.Context, request events.APIGatewayProxyRequest) (events.API
 	challenge := request.QueryStringParameters["hub.challenge"]
 
 	if mode == "subscribe" && token == os.Getenv("whatsapp_verify_token") {
-		return events.APIGatewayProxyResponse{
-			StatusCode: 200,
-			Body:       challenge,
-		}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 200, Body: challenge}, nil
 	}
+
 	return events.APIGatewayProxyResponse{StatusCode: 403}, nil
 }

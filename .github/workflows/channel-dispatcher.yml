@@ -1,12 +1,12 @@
-name: message-standardizer
+name: channel-dispatcher
 
 on:
   push:
     branches:
       - main
     paths:
-      - '.github/workflows/message-standardizer.yml'
-      - 'functions/message-standardizer/**'
+      - '.github/workflows/channel-dispatcher.yml'
+      - 'functions/channel-dispatcher/**'
       - 'functions/shared/**'
   workflow_dispatch:
 
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      FUNCTION_NAME: message-standardizer
+      FUNCTION_NAME: channel-dispatcher
       ZIP_FILE: bootstrap.zip
 
     steps:
@@ -29,7 +29,7 @@ jobs:
 
       - name: Build Go binary for Lambda
         run: |
-          cd functions/message-standardizer
+          cd functions/channel-dispatcher
           GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o bootstrap main.go
           zip ../../$ZIP_FILE bootstrap
 
