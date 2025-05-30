@@ -7,11 +7,13 @@ import (
 )
 
 type WhatsappNumber struct {
-	ID         uuid.UUID `gorm:"type:char(36);primaryKey"`
-	BusinessID uuid.UUID `gorm:"type:char(36);not null"`
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID          uuid.UUID `gorm:"type:char(36);primaryKey"`
+	UnitID      uuid.UUID `gorm:"type:char(36);not null"`
+	Number      string    `gorm:"type:varchar(20);not null"`
+	Description string    `gorm:"type:varchar(255);default:null"`
 
-	Business *Business `gorm:"foreignKey:BusinessID"`
-	Orders   []Order   `gorm:"foreignKey:WhatsappNumberID"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
+	Unit *Unit `gorm:"foreignKey:UnitID"`
 }

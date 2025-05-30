@@ -25,4 +25,5 @@ type Unit struct {
 	Business        *Business `gorm:"foreignKey:BusinessID"`
 	ProductsInUnits []ProductInUnit
 	Orders          []Order
+	WhatsappNumbers []WhatsappNumber
 }

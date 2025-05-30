@@ -10,7 +10,6 @@ type Order struct {
 	ID               uuid.UUID `gorm:"type:char(36);primaryKey"`
 	CustomerID       uuid.UUID `gorm:"type:char(36);not null"`
 	UnitID           uuid.UUID `gorm:"type:char(36);not null"`
-	WhatsappNumberID uuid.UUID `gorm:"type:char(36);not null"`
 	ChannelID        uuid.UUID `gorm:"type:char(36);not null"`
 	Status           string
 	Notes            string
@@ -22,7 +21,6 @@ type Order struct {
 
 	Customer       *Customer       `gorm:"foreignKey:CustomerID"`
 	Unit           *Unit           `gorm:"foreignKey:UnitID"`
-	WhatsappNumber *WhatsappNumber `gorm:"foreignKey:WhatsappNumberID"`
 	Channel        *Channel        `gorm:"foreignKey:ChannelID"`
 	ProductsOrders []ProductOrder
 }
