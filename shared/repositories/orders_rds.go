@@ -14,16 +14,17 @@ type OrdersRDSClient struct {
 	DB *gorm.DB
 }
 
-func NewOrdersRDSClient() *OrdersRDSClient {
+func NewOrdersRDSClient() (*OrdersRDSClient, error) {
+	log.Println(connString)
 	db, err := gorm.Open(mysql.Open(connString), &gorm.Config{})
 	if err != nil {
 		log.Printf("Error connecting to database: %v", err)
-		panic("failed to connect database")
+		return nil, err
 	}
 
 	return &OrdersRDSClient{
 		DB: db,
-	}
+	}, nil
 }
 
 func (c *OrdersRDSClient) GetDB() *gorm.DB {

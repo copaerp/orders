@@ -22,7 +22,11 @@ func handler(request RequestMessage) error {
 	if request.Channel == "dummy" {
 		log.Printf("Dummy channel selected, message: %s, number: %s", request.Message, request.Number)
 
-		rdsClient := repositories.NewOrdersRDSClient()
+		rdsClient, err := repositories.NewOrdersRDSClient()
+		if err != nil {
+			log.Printf("Error creating RDS client: %v", err)
+			return err
+		}
 
 		log.Println(rdsClient.GetDB().Name())
 
