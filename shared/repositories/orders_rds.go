@@ -1,22 +1,45 @@
 package repositories
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
+	"github.com/copaerp/orders/shared/constants"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var connString string = os.Getenv("orders_db_connection_url")
+// var dbPassword string = os.Getenv("orders_db_password")
+var dbUser string = os.Getenv("orders_db_username")
+var dbEndpoint string = os.Getenv("orders_db_endpoint")
+var dbName string = os.Getenv("orders_db_name")
 
 type OrdersRDSClient struct {
 	DB *gorm.DB
 }
 
-func NewOrdersRDSClient() (*OrdersRDSClient, error) {
-	log.Println(connString)
-	db, err := gorm.Open(mysql.Open(connString), &gorm.Config{})
+func NewOrdersRDSClient(ctx context.Context) (*OrdersRDSClient, error) {
+
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		panic("configuration error: " + err.Error())
+	}
+
+	authenticationToken, err := auth.BuildAuthToken(
+		ctx, dbEndpoint, constants.AWS_REGION, dbUser, cfg.Credentials)
+	if err != nil {
+		panic("failed to create authentication token: " + err.Error())
+	}
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true&allowCleartextPasswords=true",
+		dbUser, authenticationToken, dbEndpoint, dbName,
+	)
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Printf("Error connecting to database: %v", err)
 		return nil, err
