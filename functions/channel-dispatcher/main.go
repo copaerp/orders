@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/copaerp/orders/functions/channel-dispatcher/services"
+	"github.com/copaerp/orders/shared/repositories"
 )
 
 type RequestMessage struct {
@@ -22,9 +22,17 @@ func handler(request RequestMessage) error {
 	if request.Channel == "dummy" {
 		log.Printf("Dummy channel selected, message: %s, number: %s", request.Message, request.Number)
 
-		// lets test the db integration
+		rdsClient := repositories.NewOrdersRDSClient()
 
-		log.Println(os.Getenv("orders_db_connection_url"))
+		log.Println(rdsClient.GetDB().Name())
+
+		res, err := rdsClient.Execute("SHOW TABLES")
+		if err != nil {
+			log.Printf("Error executing query: %v", err)
+			return err
+		}
+
+		log.Printf("%v", res)
 
 		return nil
 	}
