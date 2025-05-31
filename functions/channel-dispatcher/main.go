@@ -37,7 +37,19 @@ func handler(ctx context.Context, request RequestMessage) error {
 			return err
 		}
 
-		log.Printf("%v", res)
+		rows, err := res.Rows()
+		if err != nil {
+			log.Printf("Error getting rows: %v", err)
+			return err
+		}
+
+		for rows.Next() {
+			var tableName string
+			if err := res.Scan(&tableName); err != nil {
+				log.Printf("Error scanning result: %v", err)
+				continue
+			}
+		}
 
 		return nil
 	}
