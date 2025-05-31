@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/message-standardizer.yml'
       - 'functions/message-standardizer/**'
-      - 'functions/shared/**'
+      - 'shared/**'
   workflow_dispatch:
 
 jobs:

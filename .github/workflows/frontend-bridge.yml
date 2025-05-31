@@ -8,7 +8,7 @@ on:
   #   paths:
   #     - '.github/workflows/frontend-bridge.yml'
   #     - 'functions/frontend-bridge/**'
-  #     - 'functions/shared/**'
+  #     - 'shared/**'
   workflow_dispatch:
 
 jobs:

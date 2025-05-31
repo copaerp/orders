@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/channel-dispatcher.yml'
       - 'functions/channel-dispatcher/**'
-      - 'functions/shared/**'
+      - 'shared/**'
   workflow_dispatch:
 
 jobs:
