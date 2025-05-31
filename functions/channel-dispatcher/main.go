@@ -7,6 +7,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/copaerp/orders/functions/channel-dispatcher/services"
+	"github.com/copaerp/orders/shared/entities"
 	"github.com/copaerp/orders/shared/repositories"
 )
 
@@ -31,24 +32,17 @@ func handler(ctx context.Context, request RequestMessage) error {
 
 		log.Println(rdsClient.GetDB().Name())
 
-		res, err := rdsClient.Query("SHOW TABLES")
+		var channels []entities.Channel
+
+		err = rdsClient.GetDB().Find(&channels).Error
 		if err != nil {
-			log.Printf("Error executing query: %v", err)
+			log.Printf("Erro ao buscar canais: %v", err)
 			return err
 		}
 
-		rows, err := res.Rows()
-		if err != nil {
-			log.Printf("Error getting rows: %v", err)
-			return err
-		}
-
-		for rows.Next() {
-			var tableName string
-			if err := res.Scan(&tableName); err != nil {
-				log.Printf("Error scanning result: %v", err)
-				continue
-			}
+		log.Printf("Found %d channels", len(channels))
+		for _, ch := range channels {
+			log.Printf("Canal: ID=%d, Name=%s", ch.ID, ch.Name)
 		}
 
 		return nil
