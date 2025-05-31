@@ -31,7 +31,7 @@ func handler(ctx context.Context, request RequestMessage) error {
 
 		log.Println(rdsClient.GetDB().Name())
 
-		res, err := rdsClient.Execute("SHOW TABLES")
+		res, err := rdsClient.Query("SHOW TABLES")
 		if err != nil {
 			log.Printf("Error executing query: %v", err)
 			return err

@@ -47,14 +47,3 @@ func (c *OrdersRDSClient) Query(query string, args ...any) (*gorm.DB, error) {
 
 	return result, nil
 }
-
-func (c *OrdersRDSClient) Execute(query string, args ...any) (int64, error) {
-	result := c.DB.Exec(query, args...)
-	if result.Error != nil {
-		log.Printf("Error executing query: %v", result.Error)
-		return 0, result.Error
-	}
-
-	rowsAffected := result.RowsAffected
-	return rowsAffected, nil
-}
