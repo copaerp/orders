@@ -6,15 +6,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
-	"github.com/copaerp/orders/shared/constants"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-// var dbPassword string = os.Getenv("orders_db_password")
 var dbUser string = os.Getenv("orders_db_username")
+var dbPassword string = os.Getenv("orders_db_password")
 var dbEndpoint string = os.Getenv("orders_db_endpoint")
 var dbName string = os.Getenv("orders_db_name")
 
@@ -24,21 +21,7 @@ type OrdersRDSClient struct {
 
 func NewOrdersRDSClient(ctx context.Context) (*OrdersRDSClient, error) {
 
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		panic("configuration error: " + err.Error())
-	}
-
-	authenticationToken, err := auth.BuildAuthToken(
-		ctx, dbEndpoint, constants.AWS_REGION, dbUser, cfg.Credentials,
-	)
-	if err != nil {
-		panic("failed to create authentication token: " + err.Error())
-	}
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?tls=true&allowCleartextPasswords=true",
-		dbUser, authenticationToken, dbEndpoint, dbName,
-	)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPassword, dbEndpoint, dbName)
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
