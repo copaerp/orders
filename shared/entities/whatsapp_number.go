@@ -17,3 +17,7 @@ type WhatsappNumber struct {
 
 	Unit *Unit `gorm:"foreignKey:UnitID"`
 }
+
+func (w *WhatsappNumber) TableName() string {
+	return "whatsapp_number"
+}

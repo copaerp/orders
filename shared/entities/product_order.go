@@ -17,3 +17,7 @@ type ProductOrder struct {
 	Product *Product `gorm:"foreignKey:ProductID"`
 	Order   *Order   `gorm:"foreignKey:OrderID"`
 }
+
+func (p *ProductOrder) TableName() string {
+	return "product_order"
+}

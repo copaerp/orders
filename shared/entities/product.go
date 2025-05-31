@@ -21,3 +21,7 @@ type Product struct {
 	ProductsInUnits []ProductInUnit
 	ProductsOrders  []ProductOrder
 }
+
+func (p *Product) TableName() string {
+	return "product"
+}

@@ -16,3 +16,7 @@ type ProductInUnit struct {
 	Product *Product `gorm:"foreignKey:ProductID"`
 	Unit    *Unit    `gorm:"foreignKey:UnitID"`
 }
+
+func (p *ProductInUnit) TableName() string {
+	return "product_in_unit"
+}

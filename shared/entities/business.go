@@ -22,3 +22,7 @@ type Business struct {
 	Products  []Product
 	Customers []Customer
 }
+
+func (b *Business) TableName() string {
+	return "business"
+}

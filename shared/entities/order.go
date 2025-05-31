@@ -7,20 +7,24 @@ import (
 )
 
 type Order struct {
-	ID               uuid.UUID `gorm:"type:char(36);primaryKey"`
-	CustomerID       uuid.UUID `gorm:"type:char(36);not null"`
-	UnitID           uuid.UUID `gorm:"type:char(36);not null"`
-	ChannelID        uuid.UUID `gorm:"type:char(36);not null"`
-	Status           string
-	Notes            string
-	PaymentMethod    string
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-	FinishedAt       *time.Time
-	CanceledAt       *time.Time
+	ID            uuid.UUID `gorm:"type:char(36);primaryKey"`
+	CustomerID    uuid.UUID `gorm:"type:char(36);not null"`
+	UnitID        uuid.UUID `gorm:"type:char(36);not null"`
+	ChannelID     uuid.UUID `gorm:"type:char(36);not null"`
+	Status        string
+	Notes         string
+	PaymentMethod string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	FinishedAt    *time.Time
+	CanceledAt    *time.Time
 
-	Customer       *Customer       `gorm:"foreignKey:CustomerID"`
-	Unit           *Unit           `gorm:"foreignKey:UnitID"`
-	Channel        *Channel        `gorm:"foreignKey:ChannelID"`
+	Customer       *Customer `gorm:"foreignKey:CustomerID"`
+	Unit           *Unit     `gorm:"foreignKey:UnitID"`
+	Channel        *Channel  `gorm:"foreignKey:ChannelID"`
 	ProductsOrders []ProductOrder
+}
+
+func (o *Order) TableName() string {
+	return "order"
 }

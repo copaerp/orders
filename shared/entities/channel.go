@@ -14,3 +14,7 @@ type Channel struct {
 
 	Orders []Order
 }
+
+func (c *Channel) TableName() string {
+	return "channel"
+}

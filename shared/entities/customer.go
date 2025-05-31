@@ -20,3 +20,7 @@ type Customer struct {
 	Business *Business `gorm:"foreignKey:BusinessID"`
 	Orders   []Order
 }
+
+func (c *Customer) TableName() string {
+	return "customer"
+}

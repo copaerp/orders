@@ -27,3 +27,7 @@ type Unit struct {
 	Orders          []Order
 	WhatsappNumbers []WhatsappNumber
 }
+
+func (u *Unit) TableName() string {
+	return "unit"
+}
