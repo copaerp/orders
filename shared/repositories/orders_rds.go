@@ -30,7 +30,8 @@ func NewOrdersRDSClient(ctx context.Context) (*OrdersRDSClient, error) {
 	}
 
 	authenticationToken, err := auth.BuildAuthToken(
-		ctx, dbEndpoint, constants.AWS_REGION, dbUser, cfg.Credentials)
+		ctx, dbEndpoint, constants.AWS_REGION, dbUser, cfg.Credentials,
+	)
 	if err != nil {
 		panic("failed to create authentication token: " + err.Error())
 	}

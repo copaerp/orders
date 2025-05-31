@@ -20,8 +20,8 @@ var whatsappToken string
 
 func handler(ctx context.Context, request RequestMessage) error {
 
-	if request.Channel == "dummy" {
-		log.Printf("Dummy channel selected, message: %s, number: %s", request.Message, request.Number)
+	if request.Channel != "whatsapp" {
+		log.Println("mock testing RDS connection")
 
 		rdsClient, err := repositories.NewOrdersRDSClient(ctx)
 		if err != nil {
