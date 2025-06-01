@@ -16,9 +16,9 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, senderID
 		Joins("Customer").
 		Joins("Unit").
 		Joins("Unit.WhatsappNumber").
-		Where("customer.id = ?", customerID.String()).
-		Where("whatsapp_number.id = ?", senderID.String()).
-		Where("order.finished_at IS NULL").
+		Where("Customer.id = ?", customerID.String()).
+		Where("WhatsappNumber.id = ?", senderID.String()).
+		Where("Order.finished_at IS NULL").
 		First(&order).Error
 
 	if err != nil {
@@ -35,9 +35,9 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSenderNumbers(customerNumbe
 		Joins("Customer").
 		Joins("Unit").
 		Joins("Unit.WhatsappNumber").
-		Where("customer.phone = ?", customerNumber).
-		Where("whatsapp_number.number = ?", senderNumber).
-		Where("order.finished_at IS NULL").
+		Where("Customer.phone = ?", customerNumber).
+		Where("WhatsappNumber.number = ?", senderNumber).
+		Where("Order.finished_at IS NULL").
 		First(&orders).Error
 
 	return orders, err
