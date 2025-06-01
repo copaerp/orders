@@ -8,7 +8,7 @@ func (c *OrdersRDSClient) GetUnitByWhatsappNumber(whatsappNumber string) (*entit
 	var unit entities.Unit
 	err := c.DB.
 		Joins("WhatsappNumber").
-		Where("whatsapp_number.number = ?", whatsappNumber).
+		Where("WhatsappNumber.number = ?", whatsappNumber).
 		First(&unit).Error
 
 	if err != nil {
