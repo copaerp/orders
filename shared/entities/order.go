@@ -12,8 +12,9 @@ type Order struct {
 	UnitID        uuid.UUID `gorm:"type:char(36);not null"`
 	ChannelID     uuid.UUID `gorm:"type:char(36);not null"`
 	Status        string
-	Notes         string
-	PaymentMethod string
+	Notes         *string
+	PaymentMethod *string
+	LastMessageAt time.Time
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	FinishedAt    *time.Time

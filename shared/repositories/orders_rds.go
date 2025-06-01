@@ -37,13 +37,3 @@ func NewOrdersRDSClient(ctx context.Context) (*OrdersRDSClient, error) {
 func (c *OrdersRDSClient) GetDB() *gorm.DB {
 	return c.DB
 }
-
-func (c *OrdersRDSClient) Query(query string, args ...any) (*gorm.DB, error) {
-	result := c.DB.Raw(query, args...)
-	if result.Error != nil {
-		log.Printf("Error executing query: %v", result.Error)
-		return nil, result.Error
-	}
-
-	return result, nil
-}

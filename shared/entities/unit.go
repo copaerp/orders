@@ -22,10 +22,10 @@ type Unit struct {
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 
-	Business        *Business `gorm:"foreignKey:BusinessID"`
+	Business        *Business       `gorm:"foreignKey:BusinessID"`
+	WhatsappNumber  *WhatsappNumber `gorm:"foreignKey:UnitID"`
 	ProductsInUnits []ProductInUnit
 	Orders          []Order
-	WhatsappNumbers []WhatsappNumber
 }
 
 func (u *Unit) TableName() string {
