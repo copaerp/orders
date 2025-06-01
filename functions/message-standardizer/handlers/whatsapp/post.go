@@ -3,11 +3,13 @@ package whatsapp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/copaerp/orders/functions/message-standardizer/entities"
+	ms_services "github.com/copaerp/orders/functions/message-standardizer/services"
 	"github.com/copaerp/orders/shared/constants"
 	gorm_entities "github.com/copaerp/orders/shared/entities"
 	"github.com/copaerp/orders/shared/repositories"
@@ -62,12 +64,19 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
+	menu, err := ms_services.MountMenu(rdsClient, unit.ID)
+	if err != nil {
+		log.Printf("Error mounting menu: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
 	n8nMessage := map[string]any{
 		"number":         customerNumber,
 		"message":        message,
 		"channel":        "whatsapp",
 		"sender":         senderNumber,
 		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
+		"menu":           menu,
 	}
 
 	if order == nil {
@@ -86,6 +95,24 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 			ChannelID:  channelID,
 			Status:     constants.ORDER_STATUS_JUST_STARTED,
 		}
+	} else {
+
+		productsFromOrder, err := rdsClient.GetOrderProducts(order.ID)
+		if err != nil {
+			log.Printf("Error fetching order products: %v", err)
+			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		}
+
+		var products = make(map[string]map[string]string, len(productsFromOrder))
+		for _, product := range productsFromOrder {
+			products[menu[product.ID.String()]] = map[string]string{
+				"name":        product.Name,
+				"description": product.Description,
+				"price":       fmt.Sprintf("%f", product.BRLPrice),
+				"category":    product.Category,
+			}
+		}
+
 	}
 
 	order.LastMessageAt = time.Now()

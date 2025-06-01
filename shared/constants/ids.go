@@ -6,4 +6,5 @@ const (
 	FACEBOOK_CHANNEL_ID  = "1394b549-7976-4f85-b26d-09fd2a7618d4"
 	IFOOD_CHANNEL_ID     = "8b848fb0-2b67-405c-998e-51df7324b665"
 	PHONE_CHANNEL_ID     = "a05ab3bb-b30e-469b-9445-a5bf7322cad9"
+	SITE_CHANNEL_ID      = "c7f14cd1-7e26-47b5-ae54-4808ddd673ac" // Physical store
 )
