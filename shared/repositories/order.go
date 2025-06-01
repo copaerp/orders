@@ -41,9 +41,6 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, unitID u
 		Where("order.finished_at IS NULL").
 		Find(&orders)
 
-	log.Println("quantos orders retornou?")
-	log.Println(len(orders))
-	log.Printf("%v", result.Error)
 	if result.Error != nil {
 		return nil, result.Error
 	}
