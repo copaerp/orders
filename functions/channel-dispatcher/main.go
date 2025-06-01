@@ -13,13 +13,14 @@ type RequestMessage struct {
 	Message string `json:"message"`
 	Number  string `json:"number"`
 	Channel string `json:"channel"`
+	Sender  string `json:"sender"`
 }
 
 var whatsappToken string
 
 func handler(ctx context.Context, request RequestMessage) error {
 
-	log.Printf("message to be sent: %s, number: %s, channel: %s", request.Message, request.Number, request.Channel)
+	log.Printf("message to be sent: %s, number: %s, channel: %s, sender: %s", request.Message, request.Number, request.Channel, request.Sender)
 
 	switch request.Channel {
 	case "whatsapp":

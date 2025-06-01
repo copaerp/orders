@@ -24,12 +24,14 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 	}
 
 	if len(payload.Entry) > 0 && len(payload.Entry[0].Changes) > 0 {
-		msgs := payload.Entry[0].Changes[0].Value.Messages
+		value := payload.Entry[0].Changes[0].Value
+		msgs := value.Messages
 		if len(msgs) > 0 {
 			services.NewN8NClient().Post("new_message", map[string]any{
 				"number":  msgs[0].From,
 				"message": msgs[0].Text.Body,
 				"channel": "whatsapp",
+				"sender":  value.Metadata.DisplayPhoneNumber,
 			})
 		}
 	}
