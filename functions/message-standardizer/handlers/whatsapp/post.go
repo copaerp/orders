@@ -32,6 +32,12 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 	if len(payload.Entry) > 0 && len(payload.Entry[0].Changes) > 0 {
 		value := payload.Entry[0].Changes[0].Value
+
+		if value.Statuses != nil {
+			log.Println("Received a status update, ignoring the message")
+			return events.APIGatewayProxyResponse{StatusCode: 200}, nil
+		}
+
 		msgs := value.Messages
 		if len(msgs) > 0 {
 			customerNumber = msgs[0].From

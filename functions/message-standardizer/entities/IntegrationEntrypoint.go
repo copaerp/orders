@@ -27,6 +27,24 @@ type WhatsAppMessage struct {
 					} `json:"text"`
 					Type string `json:"type"`
 				} `json:"messages"`
+				Statuses []struct {
+					ID           string `json:"id"`
+					Status       string `json:"status"`
+					Timestamp    string `json:"timestamp"`
+					RecipientID  string `json:"recipient_id"`
+					Conversation struct {
+						ID                  string `json:"id"`
+						ExpirationTimestamp string `json:"expiration_timestamp"`
+						Origin              struct {
+							Type string `json:"type"`
+						} `json:"origin"`
+					}
+					Pricing struct {
+						Billable     bool   `json:"billable"`
+						PricingModel string `json:"pricing_model"`
+						Category     string `json:"category"`
+					} `json:"pricing"`
+				}
 			} `json:"value"`
 		} `json:"changes"`
 	} `json:"entry"`
