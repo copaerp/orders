@@ -9,8 +9,11 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	"github.com/copaerp/orders/functions/message-standardizer/handlers/whatsapp"
+	"github.com/copaerp/orders/shared/repositories"
 	"github.com/copaerp/orders/shared/services"
 )
+
+var rdsClient *repositories.OrdersRDSClient
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	router := services.NewRouter()
@@ -27,9 +30,17 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		}, nil
 	}
 
-	return handler(ctx, request)
+	return handler(ctx, request, rdsClient)
 }
 
 func main() {
+
+	var err error
+	rdsClient, err = repositories.NewOrdersRDSClient()
+	if err != nil {
+		log.Printf("Error creating RDS client: %v", err)
+		panic(err)
+	}
+
 	lambda.Start(handler)
 }

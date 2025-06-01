@@ -16,7 +16,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient) (events.APIGatewayProxyResponse, error) {
 
 	log.Println("request body: ", request.Body)
 
@@ -37,12 +37,6 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 			message = msgs[0].Text.Body
 			senderNumber = value.Metadata.DisplayPhoneNumber
 		}
-	}
-
-	rdsClient, err := repositories.NewOrdersRDSClient(ctx)
-	if err != nil {
-		log.Printf("Error creating RDS client: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
 	customer, err := rdsClient.GetCustomerByNumber(customerNumber)

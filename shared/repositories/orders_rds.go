@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
@@ -19,7 +18,7 @@ type OrdersRDSClient struct {
 	DB *gorm.DB
 }
 
-func NewOrdersRDSClient(ctx context.Context) (*OrdersRDSClient, error) {
+func NewOrdersRDSClient() (*OrdersRDSClient, error) {
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUser, dbPassword, dbEndpoint, dbName)
 

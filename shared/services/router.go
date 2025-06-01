@@ -6,9 +6,10 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/copaerp/orders/shared/repositories"
 )
 
-type HandlerFunc func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
+type HandlerFunc func(context.Context, events.APIGatewayProxyRequest, *repositories.OrdersRDSClient) (events.APIGatewayProxyResponse, error)
 
 type Route struct {
 	Method  string
