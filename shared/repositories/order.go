@@ -11,21 +11,25 @@ func (c *OrdersRDSClient) SaveOrder(order *entities.Order) error {
 }
 
 func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, senderID uuid.UUID) (*entities.Order, error) {
-	var order entities.Order
-	err := c.DB.
+	var orders []entities.Order
+	result := c.DB.
 		Joins("Customer").
 		Joins("Unit").
 		Joins("Unit.WhatsappNumber").
-		Where("Customer.id = ?", customerID.String()).
-		Where("Unit__WhatsappNumber.id = ?", senderID.String()).
+		Where("Customer.id = ?", customerID).
+		Where("Unit__WhatsappNumber.id = ?", senderID).
 		Where("order.finished_at IS NULL").
-		First(&order).Error
+		Find(&orders)
 
-	if err != nil {
-		return nil, err
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	return &order, nil
+	if len(orders) == 0 {
+		return nil, nil
+	}
+
+	return &orders[0], nil
 }
 
 func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSenderNumbers(customerNumber, senderNumber string) ([]entities.Order, error) {
