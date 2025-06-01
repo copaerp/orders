@@ -8,8 +8,8 @@ import (
 func (c *OrdersRDSClient) GetProductsByUnitID(unitID uuid.UUID) ([]entities.Product, error) {
 	var products []entities.Product
 	err := c.DB.
-		Joins("ProductsInUnits").
-		Where("unit_id = ?", unitID).
+		Joins("JOIN product_in_unit piu ON piu.product_id = product.id").
+		Where("piu.unit_id = ?", unitID).
 		Find(&products).Error
 
 	if err != nil {
