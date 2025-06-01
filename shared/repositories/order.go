@@ -28,17 +28,16 @@ func (c *OrdersRDSClient) GetOrderByID(orderID string) (*entities.Order, error) 
 	return &order, nil
 }
 
-func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, senderID uuid.UUID) (*entities.Order, error) {
+func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, unitID uuid.UUID) (*entities.Order, error) {
 
-	log.Printf("GetActiveOrderByCustomerAndSender: customerID: %s, senderID: %s", customerID, senderID)
+	log.Printf("GetActiveOrderByCustomerAndSender: customerID: %s, unitID: %s", customerID, unitID)
 
 	var orders []entities.Order
 	result := c.DB.
 		Joins("Customer").
 		Joins("Unit").
-		Joins("Unit.WhatsappNumber").
 		Where("Customer.id = ?", customerID).
-		Where("Unit__WhatsappNumber.id = ?", senderID).
+		Where("Unit.id = ?", unitID).
 		Where("order.finished_at IS NULL").
 		Find(&orders)
 
