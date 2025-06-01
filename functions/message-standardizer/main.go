@@ -7,12 +7,14 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-
+	"github.com/aws/aws-sdk-go-v2/config"
+	schedulersvc "github.com/aws/aws-sdk-go-v2/service/scheduler"
 	"github.com/copaerp/orders/functions/message-standardizer/handlers/whatsapp"
 	"github.com/copaerp/orders/shared/repositories"
 	"github.com/copaerp/orders/shared/services"
 )
 
+var schedulerClient *schedulersvc.Client
 var rdsClient *repositories.OrdersRDSClient
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -30,12 +32,16 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		}, nil
 	}
 
-	return handler(ctx, request, rdsClient)
+	return handler(ctx, request, rdsClient, schedulerClient)
 }
 
 func main() {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		panic("erro ao carregar config da AWS: " + err.Error())
+	}
+	schedulerClient = schedulersvc.NewFromConfig(cfg)
 
-	var err error
 	rdsClient, err = repositories.NewOrdersRDSClient()
 	if err != nil {
 		log.Printf("Error creating RDS client: %v", err)

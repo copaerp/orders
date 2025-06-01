@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
+	schedulersvc "github.com/aws/aws-sdk-go-v2/service/scheduler"
 	"github.com/copaerp/orders/functions/message-standardizer/entities"
 	ms_services "github.com/copaerp/orders/functions/message-standardizer/services"
 	"github.com/copaerp/orders/shared/constants"
@@ -16,7 +17,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient) (events.APIGatewayProxyResponse, error) {
+func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient, schedulerClient *schedulersvc.Client) (events.APIGatewayProxyResponse, error) {
 
 	log.Println("request body: ", request.Body)
 
@@ -123,6 +124,26 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 	n8nMessage["order_last_message_at"] = order.LastMessageAt.Format(time.RFC3339)
 
 	services.NewN8NClient().Post("new_message", n8nMessage)
+
+	// _, err = schedulerClient.CreateSchedule(ctx, &schedulersvc.CreateScheduleInput{
+	// 	Name:                       aws.String("meu-agendamento-lambda"),
+	// 	ScheduleExpression:         aws.String("at(2025-06-01T23:00:00)"),
+	// 	ScheduleExpressionTimezone: aws.String("UTC"),
+	// 	FlexibleTimeWindow: &types.FlexibleTimeWindow{
+	// 		Mode: types.FlexibleTimeWindowModeOff,
+	// 	},
+	// 	Target: &types.Target{
+	// 		Arn:     aws.String("arn:aws:lambda:us-east-1:123456789012:function:minha-funcao"),
+	// 		RoleArn: aws.String("arn:aws:iam::123456789012:role/SchedulerExecutionRole"),
+	// 	},
+	// 	GroupName: aws.String("order-lifecycle"),
+	// })
+	// if err != nil {
+	// 	log.Printf("Error creating schedule: %v", err)
+	// 	return events.APIGatewayProxyResponse{
+	// 		StatusCode: 500,
+	// 	}, nil
+	// }
 
 	return events.APIGatewayProxyResponse{StatusCode: 201}, nil
 }

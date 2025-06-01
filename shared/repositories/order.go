@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"log"
+
 	"github.com/copaerp/orders/shared/entities"
 	"github.com/google/uuid"
 )
@@ -10,7 +12,26 @@ func (c *OrdersRDSClient) SaveOrder(order *entities.Order) error {
 	return result.Error
 }
 
+func (c *OrdersRDSClient) GetOrderByID(orderID string) (*entities.Order, error) {
+	var order entities.Order
+	result := c.DB.
+		Joins("Customer").
+		Joins("Unit").
+		Joins("Unit.WhatsappNumber").
+		Where("order.id = ?", orderID).
+		First(&order)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &order, nil
+}
+
 func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, senderID uuid.UUID) (*entities.Order, error) {
+
+	log.Printf("GetActiveOrderByCustomerAndSender: customerID: %s, senderID: %s", customerID, senderID)
+
 	var orders []entities.Order
 	result := c.DB.
 		Joins("Customer").
@@ -21,6 +42,9 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, senderID
 		Where("order.finished_at IS NULL").
 		Find(&orders)
 
+	log.Println("quantos orders retornou?")
+	log.Println(len(orders))
+	log.Printf("%v", result.Error)
 	if result.Error != nil {
 		return nil, result.Error
 	}
