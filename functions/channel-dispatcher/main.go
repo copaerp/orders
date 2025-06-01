@@ -42,7 +42,7 @@ func handler(ctx context.Context, request RequestMessage) error {
 
 		log.Printf("Found %d channels", len(channels))
 		for _, ch := range channels {
-			log.Printf("Canal: ID=%d, Name=%s", ch.ID, ch.Name)
+			log.Printf("Canal: ID=%s, Name=%s", ch.ID.String(), ch.Name)
 		}
 
 		return nil
