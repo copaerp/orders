@@ -7,10 +7,11 @@ import (
 )
 
 type WhatsappNumber struct {
-	ID          uuid.UUID `gorm:"type:char(36);primaryKey"`
-	UnitID      uuid.UUID `gorm:"type:char(36);not null"`
-	Number      string    `gorm:"type:varchar(20);not null"`
-	Description string    `gorm:"type:varchar(255);default:null"`
+	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
+	UnitID       uuid.UUID `gorm:"type:char(36);not null"`
+	Number       string
+	Description  string
+	MetaNumberID string
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

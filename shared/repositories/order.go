@@ -31,18 +31,3 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, senderID
 
 	return &orders[0], nil
 }
-
-func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSenderNumbers(customerNumber, senderNumber string) ([]entities.Order, error) {
-
-	var orders []entities.Order
-	err := c.DB.
-		Joins("Customer").
-		Joins("Unit").
-		Joins("Unit.WhatsappNumber").
-		Where("Customer.phone = ?", customerNumber).
-		Where("Unit__WhatsappNumber.number = ?", senderNumber).
-		Where("order.finished_at IS NULL").
-		First(&orders).Error
-
-	return orders, err
-}

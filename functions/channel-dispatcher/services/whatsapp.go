@@ -29,7 +29,7 @@ type WhatsAppMessage struct {
 	Text             WhatsAppMessageText `json:"text"`
 }
 
-func (w *WhatsAppService) SendMessage(to, message string) error {
+func (w *WhatsAppService) SendMessage(from, to, message string) error {
 
 	whatsappMessage := WhatsAppMessage{
 		MessagingProduct: "whatsapp",
@@ -45,7 +45,9 @@ func (w *WhatsAppService) SendMessage(to, message string) error {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", os.Getenv("whatsapp_api_url"), bytes.NewBuffer(jsonData))
+	fullUrl := os.Getenv("whatsapp_api_url") + from + "/messages"
+
+	req, err := http.NewRequest("POST", fullUrl, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return err
 	}

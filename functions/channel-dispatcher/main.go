@@ -10,10 +10,11 @@ import (
 )
 
 type RequestMessage struct {
-	Message string `json:"message"`
-	Number  string `json:"number"`
-	Channel string `json:"channel"`
-	Sender  string `json:"sender"`
+	Message      string `json:"message"`
+	Number       string `json:"number"`
+	Channel      string `json:"channel"`
+	Sender       string `json:"sender"`
+	MetaNumberID string `json:"meta_number_id"`
 }
 
 var whatsappToken string
@@ -25,7 +26,7 @@ func handler(ctx context.Context, request RequestMessage) error {
 	switch request.Channel {
 	case "whatsapp":
 		whatsappClient := services.NewWhatsAppService(whatsappToken)
-		err := whatsappClient.SendMessage(request.Number, request.Message)
+		err := whatsappClient.SendMessage(request.MetaNumberID, request.Number, request.Message)
 
 		return err
 	default:

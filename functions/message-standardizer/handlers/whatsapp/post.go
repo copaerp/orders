@@ -63,10 +63,11 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 	}
 
 	n8nMessage := map[string]any{
-		"number":  customerNumber,
-		"message": message,
-		"channel": "whatsapp",
-		"sender":  senderNumber,
+		"number":         customerNumber,
+		"message":        message,
+		"channel":        "whatsapp",
+		"sender":         senderNumber,
+		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
 	}
 
 	if order == nil {
