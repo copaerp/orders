@@ -7,8 +7,6 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/copaerp/orders/functions/channel-dispatcher/services"
-	"github.com/copaerp/orders/shared/entities"
-	"github.com/copaerp/orders/shared/repositories"
 )
 
 type RequestMessage struct {
@@ -20,33 +18,6 @@ type RequestMessage struct {
 var whatsappToken string
 
 func handler(ctx context.Context, request RequestMessage) error {
-
-	if request.Channel != "whatsapp" {
-		log.Println("mock testing RDS connection")
-
-		rdsClient, err := repositories.NewOrdersRDSClient(ctx)
-		if err != nil {
-			log.Printf("Error creating RDS client: %v", err)
-			return err
-		}
-
-		log.Println(rdsClient.GetDB().Name())
-
-		var channels []entities.Channel
-
-		err = rdsClient.GetDB().Find(&channels).Error
-		if err != nil {
-			log.Printf("Erro ao buscar canais: %v", err)
-			return err
-		}
-
-		log.Printf("Found %d channels", len(channels))
-		for _, ch := range channels {
-			log.Printf("Canal: ID=%s, Name=%s", ch.ID.String(), ch.Name)
-		}
-
-		return nil
-	}
 
 	log.Printf("message to be sent: %s, number: %s, channel: %s", request.Message, request.Number, request.Channel)
 
