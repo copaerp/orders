@@ -3,7 +3,6 @@ package whatsapp
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"time"
 
@@ -105,10 +104,10 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest) (events.AP
 
 		var products = make(map[string]map[string]string, len(productsFromOrder))
 		for _, product := range productsFromOrder {
-			products[menu[product.ID.String()]] = map[string]string{
+			products[menu[product.ID.String()]["index"]] = map[string]string{
 				"name":        product.Name,
 				"description": product.Description,
-				"price":       fmt.Sprintf("%f", product.BRLPrice),
+				"price":       product.BRLPrice.StringFixed(4),
 				"category":    product.Category,
 			}
 		}
