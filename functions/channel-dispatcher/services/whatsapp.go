@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -61,6 +62,8 @@ func (w *WhatsAppService) SendMessage(from, to, message string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	log.Printf("WhatsApp API response: %v", resp.Body)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("WhatsApp API returned non-success status code: %d with message %v", resp.StatusCode, err)
