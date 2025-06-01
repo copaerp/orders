@@ -3,11 +3,15 @@ package whatsapp
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	schedulersvc "github.com/aws/aws-sdk-go-v2/service/scheduler"
+	"github.com/aws/aws-sdk-go-v2/service/scheduler/types"
 	"github.com/copaerp/orders/functions/message-standardizer/entities"
 	ms_services "github.com/copaerp/orders/functions/message-standardizer/services"
 	"github.com/copaerp/orders/shared/constants"
@@ -131,25 +135,28 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 	services.NewN8NClient().Post("new_message", n8nMessage)
 
-	// _, err = schedulerClient.CreateSchedule(ctx, &schedulersvc.CreateScheduleInput{
-	// 	Name:                       aws.String("meu-agendamento-lambda"),
-	// 	ScheduleExpression:         aws.String("at(2025-06-01T23:00:00)"),
-	// 	ScheduleExpressionTimezone: aws.String("UTC"),
-	// 	FlexibleTimeWindow: &types.FlexibleTimeWindow{
-	// 		Mode: types.FlexibleTimeWindowModeOff,
-	// 	},
-	// 	Target: &types.Target{
-	// 		Arn:     aws.String("arn:aws:lambda:us-east-1:123456789012:function:minha-funcao"),
-	// 		RoleArn: aws.String("arn:aws:iam::123456789012:role/SchedulerExecutionRole"),
-	// 	},
-	// 	GroupName: aws.String("order-lifecycle"),
-	// })
-	// if err != nil {
-	// 	log.Printf("Error creating schedule: %v", err)
-	// 	return events.APIGatewayProxyResponse{
-	// 		StatusCode: 500,
-	// 	}, nil
-	// }
+	scheduleTime := time.Now().Add(10 * time.Minute).UTC().Format("2006-01-02T15:04:05")
+
+	_, err = schedulerClient.CreateSchedule(ctx, &schedulersvc.CreateScheduleInput{
+		Name:                       aws.String(fmt.Sprintf("order-warning-%s", order.ID.String())),
+		ScheduleExpression:         aws.String(fmt.Sprintf("at(%s)", scheduleTime)),
+		ScheduleExpressionTimezone: aws.String("UTC"),
+		FlexibleTimeWindow: &types.FlexibleTimeWindow{
+			Mode: types.FlexibleTimeWindowModeOff,
+		},
+		Target: &types.Target{
+			Arn:     aws.String(os.Getenv("ot_arn")),
+			RoleArn: aws.String(os.Getenv("role_arn")),
+			Input:   aws.String(fmt.Sprintf(`{"order_id": "%s", "type": "warning"}`, order.ID.String())),
+		},
+		GroupName: aws.String("order-lifecycle"),
+	})
+	if err != nil {
+		log.Printf("Error creating schedule: %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: 500,
+		}, nil
+	}
 
 	return events.APIGatewayProxyResponse{StatusCode: 201}, nil
 }
