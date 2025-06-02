@@ -14,6 +14,7 @@ type Order struct {
 	Status        string
 	Notes         *string
 	PaymentMethod *string
+	UsedMenu      []byte `gorm:"type:blob;default:NULL"`
 	LastMessageAt time.Time
 	CreatedAt     time.Time
 	UpdatedAt     time.Time

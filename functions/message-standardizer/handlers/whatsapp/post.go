@@ -64,10 +64,19 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
-	menu, err := ms_services.MountMenu(rdsClient, unit.ID)
-	if err != nil {
-		log.Printf("Error mounting menu: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	var menu map[string]map[string]string
+	if order == nil || order.UsedMenu == nil {
+		menu, err = ms_services.MountMenu(rdsClient, order.UnitID)
+		if err != nil {
+			log.Printf("Error mounting menu for existing order: %v", err)
+			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		}
+	} else {
+		err := json.Unmarshal(order.UsedMenu, &menu)
+		if err != nil {
+			log.Printf("Error unmarshalling used menu: %v", err)
+			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		}
 	}
 
 	n8nMessage := map[string]any{
@@ -116,6 +125,13 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 	}
 
 	order.LastMessageAt = time.Now()
+	if order.UsedMenu == nil {
+		order.UsedMenu, err = json.Marshal(menu)
+		if err != nil {
+			log.Printf("Error marshalling used menu: %v", err)
+			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		}
+	}
 	err = rdsClient.SaveOrder(order)
 	if err != nil {
 		log.Printf("Error saving order: %v", err)
