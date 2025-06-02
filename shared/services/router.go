@@ -6,11 +6,10 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
-	schedulersvc "github.com/aws/aws-sdk-go-v2/service/scheduler"
 	"github.com/copaerp/orders/shared/repositories"
 )
 
-type HandlerFunc func(context.Context, events.APIGatewayProxyRequest, *repositories.OrdersRDSClient, *schedulersvc.Client) (events.APIGatewayProxyResponse, error)
+type HandlerFunc func(context.Context, events.APIGatewayProxyRequest, *repositories.OrdersRDSClient, *repositories.EventBridgeClient) (events.APIGatewayProxyResponse, error)
 
 type Route struct {
 	Method  string

@@ -5,13 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	schedulersvc "github.com/aws/aws-sdk-go-v2/service/scheduler"
-	"github.com/aws/aws-sdk-go-v2/service/scheduler/types"
 	"github.com/copaerp/orders/functions/message-standardizer/entities"
 	ms_services "github.com/copaerp/orders/functions/message-standardizer/services"
 	"github.com/copaerp/orders/shared/constants"
@@ -21,7 +17,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient, schedulerClient *schedulersvc.Client) (events.APIGatewayProxyResponse, error) {
+func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient, eventBridgeClient *repositories.EventBridgeClient) (events.APIGatewayProxyResponse, error) {
 
 	log.Println("request body: ", request.Body)
 
@@ -135,28 +131,37 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 	services.NewN8NClient().Post("new_message", n8nMessage)
 
-	scheduleTime := time.Now().Add(10 * time.Minute).UTC().Format("2006-01-02T15:04:05")
+	eventBridgePayload := map[string]any{
+		"order_id": order.ID.String(),
+		"type":     "warn",
+		"channel":  "whatsapp",
+	}
 
-	_, err = schedulerClient.CreateSchedule(ctx, &schedulersvc.CreateScheduleInput{
-		Name:                       aws.String(fmt.Sprintf("order-warning-%s", order.ID.String())),
-		ScheduleExpression:         aws.String(fmt.Sprintf("at(%s)", scheduleTime)),
-		ScheduleExpressionTimezone: aws.String("UTC"),
-		FlexibleTimeWindow: &types.FlexibleTimeWindow{
-			Mode: types.FlexibleTimeWindowModeOff,
-		},
-		Target: &types.Target{
-			Arn:     aws.String(os.Getenv("ot_arn")),
-			RoleArn: aws.String(os.Getenv("role_arn")),
-			Input:   aws.String(fmt.Sprintf(`{"order_id": "%s", "type": "warning"}`, order.ID.String())),
-		},
-		GroupName: aws.String("order-lifecycle"),
-	})
+	err = eventBridgeClient.PutEvent(
+		ctx,
+		fmt.Sprintf("order-%s", order.ID.String()),
+		10*time.Minute,
+		eventBridgePayload,
+	)
 	if err != nil {
 		log.Printf("Error creating schedule: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: 500,
-		}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
+
+	eventBridgePayload["type"] = "timeout"
+
+	err = eventBridgeClient.PutEvent(
+		ctx,
+		fmt.Sprintf("order-%s", order.ID.String()),
+		1*time.Hour,
+		eventBridgePayload,
+	)
+	if err != nil {
+		log.Printf("Error creating schedule: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
+	log.Println("Schedule created successfully for order:", order.ID.String())
 
 	return events.APIGatewayProxyResponse{StatusCode: 201}, nil
 }
