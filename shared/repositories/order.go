@@ -39,6 +39,7 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, unitID u
 		Where("Customer.id = ?", customerID).
 		Where("Unit.id = ?", unitID).
 		Where("order.finished_at IS NULL").
+		Where("order.canceled_at IS NULL").
 		Find(&orders)
 
 	if result.Error != nil {
