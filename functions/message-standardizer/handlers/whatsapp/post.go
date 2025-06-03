@@ -64,30 +64,6 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
-	var menu map[string]map[string]string
-	if order == nil || order.UsedMenu == nil {
-		menu, err = ms_services.MountMenu(rdsClient, order.UnitID)
-		if err != nil {
-			log.Printf("Error mounting menu for existing order: %v", err)
-			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
-		}
-	} else {
-		err := json.Unmarshal(order.UsedMenu, &menu)
-		if err != nil {
-			log.Printf("Error unmarshalling used menu: %v", err)
-			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
-		}
-	}
-
-	n8nMessage := map[string]any{
-		"number":         customerNumber,
-		"message":        message,
-		"channel":        "whatsapp",
-		"sender":         senderNumber,
-		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
-		"menu":           menu,
-	}
-
 	if order == nil {
 		log.Println("No active order found for customer and sender, creating a new order")
 
@@ -97,14 +73,44 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 		}
 
+		menu, err := ms_services.MountMenu(rdsClient, unit.ID)
+		if err != nil {
+			log.Printf("Error mounting menu for existing order: %v", err)
+			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		}
+
+		byteMenu, err := json.Marshal(menu)
+		if err != nil {
+			log.Printf("Error marshalling used menu: %v", err)
+			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+		}
+
 		order = &gorm_entities.Order{
 			ID:         uuid.New(),
 			CustomerID: customer.ID,
 			UnitID:     unit.ID,
 			ChannelID:  channelID,
 			Status:     constants.ORDER_STATUS_JUST_STARTED,
+			UsedMenu:   byteMenu,
 		}
-	} else {
+	}
+
+	menuAsMap, err := order.GetMenuAsMap()
+	if err != nil {
+		log.Printf("Error getting menu as map: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
+	n8nMessage := map[string]any{
+		"number":         customerNumber,
+		"message":        message,
+		"channel":        "whatsapp",
+		"sender":         senderNumber,
+		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
+		"menu":           menuAsMap,
+	}
+
+	if order != nil {
 
 		productsFromOrder, err := rdsClient.GetOrderProducts(order.ID)
 		if err != nil {
@@ -114,7 +120,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 		var products = make(map[string]map[string]string, len(productsFromOrder))
 		for _, product := range productsFromOrder {
-			products[menu[product.ID.String()]["index"]] = map[string]string{
+			products[menuAsMap[product.ID.String()]["index"]] = map[string]string{
 				"name":        product.Name,
 				"description": product.Description,
 				"price":       product.BRLPrice.StringFixed(4),
@@ -125,13 +131,6 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 	}
 
 	order.LastMessageAt = time.Now()
-	if order.UsedMenu == nil {
-		order.UsedMenu, err = json.Marshal(menu)
-		if err != nil {
-			log.Printf("Error marshalling used menu: %v", err)
-			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
-		}
-	}
 	err = rdsClient.SaveOrder(order)
 	if err != nil {
 		log.Printf("Error saving order: %v", err)
