@@ -17,6 +17,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const channel = "whatsapp"
+
 func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient, eventBridgeClient *repositories.EventBridgeClient) (events.APIGatewayProxyResponse, error) {
 
 	log.Println("request body: ", request.Body)
@@ -104,7 +106,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 	n8nMessage := map[string]any{
 		"number":         customerNumber,
 		"message":        message,
-		"channel":        "whatsapp",
+		"channel":        channel,
 		"sender":         senderNumber,
 		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
 		"menu":           menuAsMap,
@@ -137,7 +139,8 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
-	n8nMessage["order_id"] = order.ID.String()
+	strOrderID := order.ID.String()
+	n8nMessage["order_id"] = strOrderID
 	n8nMessage["customer_id"] = order.CustomerID.String()
 	n8nMessage["unit_id"] = order.UnitID.String()
 	n8nMessage["channel_id"] = order.ChannelID.String()
@@ -147,14 +150,14 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 	services.NewN8NClient().Post("new_message", n8nMessage)
 
 	eventBridgePayload := map[string]any{
-		"order_id": order.ID.String(),
+		"order_id": strOrderID,
+		"channel":  channel,
 		"type":     "warn",
-		"channel":  "whatsapp",
 	}
 
 	err = eventBridgeClient.PutEvent(
 		ctx,
-		fmt.Sprintf("order-%s", order.ID.String()),
+		fmt.Sprintf("order-%s", strOrderID),
 		10*time.Minute,
 		eventBridgePayload,
 	)
@@ -163,11 +166,11 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
-	eventBridgePayload["type"] = "timeout"
+	eventBridgePayload["type"] = constants.ORDER_STATUS_TIMEOUT
 
 	err = eventBridgeClient.PutEvent(
 		ctx,
-		fmt.Sprintf("order-%s", order.ID.String()),
+		fmt.Sprintf("order-%s", strOrderID),
 		1*time.Hour,
 		eventBridgePayload,
 	)
@@ -176,7 +179,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
-	log.Println("Schedule created successfully for order:", order.ID.String())
+	log.Println("Schedule created successfully for order:", n8nMessage["order_id"])
 
 	return events.APIGatewayProxyResponse{StatusCode: 201}, nil
 }

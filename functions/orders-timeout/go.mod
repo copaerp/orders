@@ -1,4 +1,4 @@
-module github.com/copaerp/orders/functions/message-standardizer
+module github.com/copaerp/orders/functions/orders-timeout
 
 go 1.24.2
 

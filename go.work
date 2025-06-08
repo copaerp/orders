@@ -4,5 +4,6 @@ use (
 	./functions/channel-dispatcher
 	./functions/frontend-bridge
 	./functions/message-standardizer
+	./functions/orders-timeout
 	./shared
 )
