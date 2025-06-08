@@ -97,10 +97,26 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		}
 	}
 
-	menuAsMap, err := order.GetMenuAsMap()
+	menuAsMapArr, err := order.GetMenuAsMapArr()
 	if err != nil {
 		log.Printf("Error getting menu as map: %v", err)
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
+	productsFromOrder, err := rdsClient.GetOrderProducts(order.ID)
+	if err != nil {
+		log.Printf("Error fetching order products: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
+	var products = make([]map[string]string, len(productsFromOrder))
+	for i, product := range productsFromOrder {
+		products[i] = map[string]string{
+			"name":        product.Name,
+			"description": product.Description,
+			"price":       product.BRLPrice.StringFixed(2),
+			"category":    product.Category,
+		}
 	}
 
 	n8nMessage := map[string]any{
@@ -109,27 +125,8 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		"channel":        channel,
 		"sender":         senderNumber,
 		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
-		"menu":           menuAsMap,
-	}
-
-	if order != nil {
-
-		productsFromOrder, err := rdsClient.GetOrderProducts(order.ID)
-		if err != nil {
-			log.Printf("Error fetching order products: %v", err)
-			return events.APIGatewayProxyResponse{StatusCode: 500}, nil
-		}
-
-		var products = make(map[string]map[string]string, len(productsFromOrder))
-		for _, product := range productsFromOrder {
-			products[menuAsMap[product.ID.String()]["index"]] = map[string]string{
-				"name":        product.Name,
-				"description": product.Description,
-				"price":       product.BRLPrice.StringFixed(4),
-				"category":    product.Category,
-			}
-		}
-
+		"menu":           menuAsMapArr,
+		"products":       products,
 	}
 
 	order.LastMessageAt = time.Now()

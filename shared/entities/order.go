@@ -32,8 +32,8 @@ func (o *Order) TableName() string {
 	return "order"
 }
 
-func (o *Order) GetMenuAsMap() (map[string]map[string]string, error) {
-	var menu map[string]map[string]string
+func (o *Order) GetMenuAsMapArr() ([]map[string]string, error) {
+	var menu []map[string]string
 	if err := json.Unmarshal(o.UsedMenu, &menu); err != nil {
 		return nil, err
 	}
