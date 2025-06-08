@@ -31,7 +31,7 @@ func handler(ctx context.Context, request Request) error {
 		}
 	}
 
-	services.NewN8NClient().Post("new_message", map[string]any{
+	services.NewN8NClient().Post("order_timeout", map[string]any{
 		"order_id": request.OrderID,
 		"channel":  request.Channel,
 		"type":     request.Type,

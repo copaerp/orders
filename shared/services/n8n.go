@@ -11,6 +11,7 @@ import (
 
 var WORKFLOWS = map[string]string{
 	"new_message": os.Getenv("n8n_webhook_url") + os.Getenv("new_message_workflow_id"),
+	"order_timeout": os.Getenv("n8n_webhook_url") + os.Getenv("order_timeout_workflow_id"),
 }
 
 type N8NClient struct{}
