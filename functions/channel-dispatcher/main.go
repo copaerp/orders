@@ -35,7 +35,7 @@ func handler(ctx context.Context, request RequestMessage) error {
 	log.Printf("message to be sent: %s, number: %s, channel: %s, sender: %s", request.Message, customerNumber, channel, senderMetaNumberID)
 
 	switch channel {
-	case "whatsapp":
+	case "WhatsApp":
 		whatsappClient := services.NewWhatsAppService(whatsappToken)
 		err := whatsappClient.SendMessage(senderMetaNumberID, customerNumber, request.Message)
 
