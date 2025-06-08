@@ -63,6 +63,11 @@ func (c *OrdersRDSClient) CloseOrder(orderID string) error {
 		return result.Error
 	}
 
+	if order.FinishedAt != nil {
+		log.Printf("Order %s is already finished", orderID)
+		return nil
+	}
+
 	finishedAt := time.Now()
 	order.FinishedAt = &finishedAt
 	order.Status = constants.ORDER_STATUS_TIMEOUT
