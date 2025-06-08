@@ -157,7 +157,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 	err = eventBridgeClient.PutEvent(
 		ctx,
-		fmt.Sprintf("order-%s", strOrderID),
+		fmt.Sprintf("order-warn-%s", strOrderID),
 		10*time.Minute,
 		eventBridgePayload,
 	)
@@ -170,7 +170,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 	err = eventBridgeClient.PutEvent(
 		ctx,
-		fmt.Sprintf("order-%s", strOrderID),
+		fmt.Sprintf("order-timeout-%s", strOrderID),
 		1*time.Hour,
 		eventBridgePayload,
 	)
