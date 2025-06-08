@@ -19,6 +19,7 @@ func (c *OrdersRDSClient) GetOrderByID(orderID string) (*entities.Order, error) 
 	result := c.DB.
 		Joins("Customer").
 		Joins("Unit").
+		Joins("Channel").
 		Joins("Unit.WhatsappNumber").
 		Where("order.id = ?", orderID).
 		First(&order)
