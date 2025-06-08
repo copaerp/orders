@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -65,7 +66,7 @@ func (c *OrdersRDSClient) CloseOrder(orderID string) error {
 
 	if order.FinishedAt != nil {
 		log.Printf("Order %s is already finished", orderID)
-		return nil
+		return errors.New("order is already finished")
 	}
 
 	finishedAt := time.Now()
