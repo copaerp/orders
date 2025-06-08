@@ -13,7 +13,6 @@ import (
 type RequestMessage struct {
 	OrderID string `json:"order_id"`
 	Message string `json:"message"`
-	Channel string `json:"channel"`
 }
 
 var whatsappToken string
@@ -21,7 +20,7 @@ var rdsClient *repositories.OrdersRDSClient
 
 func handler(ctx context.Context, request RequestMessage) error {
 
-	log.Printf("message to be sent: %s, channel: %s, order_id: %s", request.Message, request.Channel, request.OrderID)
+	log.Printf("message to be sent: %s, order_id: %s", request.Message, request.OrderID)
 
 	order, err := rdsClient.GetOrderByID(request.OrderID)
 	if err != nil {
@@ -29,20 +28,21 @@ func handler(ctx context.Context, request RequestMessage) error {
 		return fmt.Errorf("error fetching order: %v", err)
 	}
 
+	channel := order.Channel.Name
 	customerNumber := order.Customer.Phone
 	senderMetaNumberID := order.Unit.WhatsappNumber.MetaNumberID
 
-	log.Printf("message to be sent: %s, number: %s, channel: %s, sender: %s", request.Message, customerNumber, request.Channel, senderMetaNumberID)
+	log.Printf("message to be sent: %s, number: %s, channel: %s, sender: %s", request.Message, customerNumber, channel, senderMetaNumberID)
 
-	switch request.Channel {
+	switch channel {
 	case "whatsapp":
 		whatsappClient := services.NewWhatsAppService(whatsappToken)
 		err := whatsappClient.SendMessage(senderMetaNumberID, customerNumber, request.Message)
 
 		return err
 	default:
-		log.Printf("Channel %s not supported", request.Channel)
-		return fmt.Errorf("channel %s not supported", request.Channel)
+		log.Printf("Channel %s not supported", channel)
+		return fmt.Errorf("channel %s not supported", channel)
 	}
 }
 

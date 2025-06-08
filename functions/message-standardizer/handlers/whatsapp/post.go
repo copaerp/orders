@@ -17,8 +17,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const channel = "whatsapp"
-
 func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient *repositories.OrdersRDSClient, eventBridgeClient *repositories.EventBridgeClient) (events.APIGatewayProxyResponse, error) {
 
 	log.Println("request body: ", request.Body)
@@ -97,6 +95,13 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		}
 	}
 
+	order.LastMessageAt = time.Now()
+	err = rdsClient.SaveOrder(order)
+	if err != nil {
+		log.Printf("Error saving order: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
+	}
+
 	menuAsMapArr, err := order.GetMenuAsMapArr()
 	if err != nil {
 		log.Printf("Error getting menu as map: %v", err)
@@ -119,36 +124,22 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		}
 	}
 
-	n8nMessage := map[string]any{
-		"number":         customerNumber,
-		"message":        message,
-		"channel":        channel,
-		"sender":         senderNumber,
-		"meta_number_id": unit.WhatsappNumber.MetaNumberID,
-		"menu":           menuAsMapArr,
-		"products":       products,
-	}
-
-	order.LastMessageAt = time.Now()
-	err = rdsClient.SaveOrder(order)
-	if err != nil {
-		log.Printf("Error saving order: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
-	}
-
 	strOrderID := order.ID.String()
-	n8nMessage["order_id"] = strOrderID
-	n8nMessage["customer_id"] = order.CustomerID.String()
-	n8nMessage["unit_id"] = order.UnitID.String()
-	n8nMessage["channel_id"] = order.ChannelID.String()
-	n8nMessage["order_status"] = order.Status
-	n8nMessage["order_last_message_at"] = order.LastMessageAt.Format(time.RFC3339)
+	n8nMessage := map[string]any{
+		"message":               message,
+		"menu":                  menuAsMapArr,
+		"products":              products,
+		"order_id":              strOrderID,
+		"customer_id":           customer.ID.String(),
+		"unit_id":               unit.ID.String(),
+		"order_status":          order.Status,
+		"order_last_message_at": order.LastMessageAt.Format(time.RFC3339),
+	}
 
 	services.NewN8NClient().Post("new_message", n8nMessage)
 
 	eventBridgePayload := map[string]any{
 		"order_id": strOrderID,
-		"channel":  channel,
 		"type":     "warn",
 	}
 

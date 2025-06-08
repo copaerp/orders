@@ -14,7 +14,6 @@ var rdsClient *repositories.OrdersRDSClient
 
 type Request struct {
 	OrderID string `json:"order_id"`
-	Channel string `json:"channel"`
 	Type    string `json:"type"` // "timeout" | "warn"
 }
 
@@ -33,7 +32,6 @@ func handler(ctx context.Context, request Request) error {
 
 	services.NewN8NClient().Post("order_timeout", map[string]any{
 		"order_id": request.OrderID,
-		"channel":  request.Channel,
 		"type":     request.Type,
 	})
 
