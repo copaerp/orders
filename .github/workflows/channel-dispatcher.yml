@@ -9,6 +9,7 @@ on:
       - 'functions/channel-dispatcher/**'
       - 'shared/**'
   workflow_dispatch:
+  workflow_call:
 
 jobs:
   deploy:
