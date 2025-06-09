@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"errors"
 	"log"
 	"time"
 
@@ -59,14 +58,9 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, unitID u
 
 func (c *OrdersRDSClient) CloseOrder(orderID string) error {
 	var order entities.Order
-	result := c.DB.First(&order, "id = ?", orderID)
+	result := c.DB.First(&order, "id = ?", orderID).Where("finished_at IS NULL")
 	if result.Error != nil {
 		return result.Error
-	}
-
-	if order.FinishedAt != nil {
-		log.Printf("Order %s is already finished", orderID)
-		return errors.New("order is already finished")
 	}
 
 	finishedAt := time.Now()
