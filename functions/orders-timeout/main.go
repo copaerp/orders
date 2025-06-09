@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/copaerp/orders/shared/constants"
@@ -22,10 +23,24 @@ func handler(ctx context.Context, request Request) error {
 	log.Println("received request:")
 	log.Printf("%v", request)
 
+	order, err := rdsClient.GetOrder(request.OrderID)
+	if err != nil {
+		log.Printf("Error fetching order: %v", err)
+		return err
+	}
+
+	if order.FinishedAt != nil || order.CanceledAt != nil {
+		log.Printf("Order %s is already finished or canceled, skipping timeout processing", request.OrderID)
+		return nil
+	}
+
 	if request.Type == constants.ORDER_STATUS_TIMEOUT {
-		err := rdsClient.CloseOrder(request.OrderID)
+
+		finishedAt := time.Now()
+		order.FinishedAt = &finishedAt
+		err = rdsClient.SaveOrder(&order)
 		if err != nil {
-			log.Printf("Error closing order: %v", err)
+			log.Printf("Error finishing order: %v", err)
 			return err
 		}
 	}

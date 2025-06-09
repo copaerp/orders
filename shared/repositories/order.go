@@ -2,9 +2,7 @@ package repositories
 
 import (
 	"log"
-	"time"
 
-	"github.com/copaerp/orders/shared/constants"
 	"github.com/copaerp/orders/shared/entities"
 	"github.com/google/uuid"
 )
@@ -56,16 +54,12 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, unitID u
 	return &orders[0], nil
 }
 
-func (c *OrdersRDSClient) CloseOrder(orderID string) error {
+func (c *OrdersRDSClient) GetOrder(orderID string) (entities.Order, error) {
 	var order entities.Order
-	result := c.DB.First(&order, "id = ?", orderID).Where("finished_at IS NULL")
+	result := c.DB.First(&order, "id = ?", orderID)
 	if result.Error != nil {
-		return result.Error
+		return entities.Order{}, result.Error
 	}
 
-	finishedAt := time.Now()
-	order.FinishedAt = &finishedAt
-	order.Status = constants.ORDER_STATUS_TIMEOUT
-	result = c.DB.Save(&order)
-	return result.Error
+	return order, result.Error
 }
