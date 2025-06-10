@@ -10,7 +10,6 @@ on:
   #     - 'functions/frontend-bridge/**'
   #     - 'shared/**'
   workflow_dispatch:
-  workflow_call:
 
 jobs:
   deploy:
