@@ -11,8 +11,8 @@ import (
 )
 
 type RequestMessage struct {
-	OrderID string `json:"order_id"`
-	Message string `json:"message"`
+	OrderID string         `json:"order_id"`
+	Message map[string]any `json:"message"`
 }
 
 var whatsappToken string
@@ -37,9 +37,15 @@ func handler(ctx context.Context, request RequestMessage) error {
 	switch channel {
 	case "WhatsApp":
 		whatsappClient := services.NewWhatsAppService(whatsappToken)
-		err := whatsappClient.SendMessage(senderMetaNumberID, customerNumber, request.Message)
 
-		return err
+		messageMainText := request.Message["main_text"].(string)
+
+		if request.Message["button"] != nil {
+			button := request.Message["button"].(map[string]any)
+			return whatsappClient.SendInteractiveMessage(senderMetaNumberID, customerNumber, messageMainText, button)
+		}
+
+		return whatsappClient.SendMessage(senderMetaNumberID, customerNumber, messageMainText)
 	default:
 		log.Printf("Channel %s not supported", channel)
 		return fmt.Errorf("channel %s not supported", channel)

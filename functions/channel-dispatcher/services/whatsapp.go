@@ -20,29 +20,8 @@ func NewWhatsAppService(token string) *WhatsAppService {
 	}
 }
 
-type WhatsAppMessageText struct {
-	Body string `json:"body"`
-}
-
-type WhatsAppMessage struct {
-	MessagingProduct string              `json:"messaging_product"`
-	To               string              `json:"to"`
-	Type             string              `json:"type"`
-	Text             WhatsAppMessageText `json:"text"`
-}
-
-func (w *WhatsAppService) SendMessage(from, to, message string) error {
-
-	whatsappMessage := WhatsAppMessage{
-		MessagingProduct: "whatsapp",
-		To:               to,
-		Type:             "text",
-		Text: WhatsAppMessageText{
-			Body: message,
-		},
-	}
-
-	jsonData, err := json.Marshal(whatsappMessage)
+func (w *WhatsAppService) sendDefaultMessage(from, to string, whatsAppMessage WhatsAppMessage) error {
+	jsonData, err := json.Marshal(whatsAppMessage)
 	if err != nil {
 		return err
 	}
@@ -77,4 +56,54 @@ func (w *WhatsAppService) SendMessage(from, to, message string) error {
 	}
 
 	return nil
+}
+
+func (w *WhatsAppService) SendMessage(from, to, message string) error {
+
+	whatsAppMessage := WhatsAppMessage{
+		MessagingProduct: "whatsapp",
+		To:               to,
+		Type:             "text",
+		Text: &WhatsAppMessageText{
+			Body: message,
+		},
+	}
+
+	return w.sendDefaultMessage(from, to, whatsAppMessage)
+}
+
+func (w *WhatsAppService) SendInteractiveMessage(from, to, message string, button map[string]any) error {
+
+	interactiveRows := []WhatsAppInteractiveRow{}
+	for _, row := range button["rows"].([]any) {
+		rowMap := row.(map[string]any)
+		interactiveRows = append(interactiveRows, WhatsAppInteractiveRow{
+			ID:          rowMap["id"].(string),
+			Title:       rowMap["title"].(string),
+			Description: rowMap["description"].(string),
+		})
+	}
+
+	whatsAppMessage := WhatsAppMessage{
+		MessagingProduct: "whatsapp",
+		To:               to,
+		Type:             "interactive",
+		Interactive: &WhatsAppInteractiveContent{
+			Type: "list",
+			Body: WhatsAppTextBody{
+				Text: message,
+			},
+			Action: WhatsAppInteractiveAction{
+				Button: button["text"].(string),
+				Sections: []WhatsAppInteractiveSection{
+					{
+						Title: button["rows_title"].(string),
+						Rows:  interactiveRows,
+					},
+				},
+			},
+		},
+	}
+
+	return w.sendDefaultMessage(from, to, whatsAppMessage)
 }
