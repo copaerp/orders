@@ -97,7 +97,7 @@ func (w *WhatsAppService) SendInteractiveMessage(from, to, message string, butto
 				Button: button["text"].(string),
 				Sections: []WhatsAppInteractiveSection{
 					{
-						Title: button["rows_title"].(string),
+						Title: "",
 						Rows:  interactiveRows,
 					},
 				},
