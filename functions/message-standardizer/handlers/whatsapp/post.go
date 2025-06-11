@@ -41,8 +41,12 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		msgs := value.Messages
 		if len(msgs) > 0 {
 			customerNumber = msgs[0].From
-			message = msgs[0].Text.Body
 			senderNumber = value.Metadata.DisplayPhoneNumber
+			if msgs[0].Type == "interactive" {
+				message = msgs[0].Interactive.ListReply.ID
+			} else {
+				message = msgs[0].Text.Body
+			}
 		}
 	}
 
