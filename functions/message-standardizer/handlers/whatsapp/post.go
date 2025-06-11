@@ -43,7 +43,11 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 			customerNumber = msgs[0].From
 			senderNumber = value.Metadata.DisplayPhoneNumber
 			if msgs[0].Type == "interactive" {
-				message = msgs[0].Interactive.ListReply.ID
+				if msgs[0].Interactive.Type == "button_reply" {
+					message = msgs[0].Interactive.ButtonReply.ID
+				} else {
+					message = msgs[0].Interactive.ListReply.ID
+				}
 			} else {
 				message = msgs[0].Text.Body
 			}
