@@ -108,27 +108,11 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
 	}
 
-	productsFromOrder, err := rdsClient.GetOrderProducts(order.ID)
-	if err != nil {
-		log.Printf("Error fetching order products: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: 500}, nil
-	}
-
-	var products = make([]map[string]string, len(productsFromOrder))
-	for i, product := range productsFromOrder {
-		products[i] = map[string]string{
-			"name":        product.Name,
-			"description": product.Description,
-			"price":       product.BRLPrice.StringFixed(2),
-			"category":    product.Category,
-		}
-	}
-
 	strOrderID := order.ID.String()
 	n8nMessage := map[string]any{
 		"message":               message,
 		"menu":                  menuAsMapArr,
-		"products":              products,
+		"products":              order.CurrentCart,
 		"order_id":              strOrderID,
 		"customer_id":           customer.ID.String(),
 		"unit_id":               unit.ID.String(),

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/datatypes"
 )
 
 type Order struct {
@@ -15,7 +16,8 @@ type Order struct {
 	Status        string
 	Notes         *string
 	PaymentMethod *string
-	UsedMenu      []byte `gorm:"type:blob;default:NULL"`
+	UsedMenu      []byte         `gorm:"type:blob;default:NULL"`
+	CurrentCart   datatypes.JSON `gorm:"type:json;default:NULL"`
 	LastMessageAt time.Time
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
