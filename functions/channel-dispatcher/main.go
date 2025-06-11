@@ -41,8 +41,13 @@ func handler(ctx context.Context, request RequestMessage) error {
 		messageMainText := request.Message["main_text"].(string)
 
 		if request.Message["button"] != nil {
-			button := request.Message["button"].(map[string]any)
-			return whatsappClient.SendInteractiveMessage(senderMetaNumberID, customerNumber, messageMainText, button)
+			item := request.Message["button"].(map[string]any)
+			return whatsappClient.SendButtonMessage(senderMetaNumberID, customerNumber, messageMainText, item)
+		}
+
+		if request.Message["buttons"] != nil {
+			item := request.Message["buttons"].(map[string]any)
+			return whatsappClient.SendButtonsMessage(senderMetaNumberID, customerNumber, messageMainText, item)
 		}
 
 		return whatsappClient.SendMessage(senderMetaNumberID, customerNumber, messageMainText)
