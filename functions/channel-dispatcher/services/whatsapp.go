@@ -52,7 +52,7 @@ func (w *WhatsAppService) sendDefaultMessage(from string, whatsAppMessage WhatsA
 	log.Printf("WhatsApp API response: %s", bodyString)
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-		return fmt.Errorf("WhatsApp API returned non-success status code: %d with message %v", resp.StatusCode, err)
+		return fmt.Errorf("WhatsApp API returned non-success status code: %d with message %s", resp.StatusCode, bodyString)
 	}
 
 	return nil
