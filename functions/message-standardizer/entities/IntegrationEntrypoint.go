@@ -35,7 +35,7 @@ type WhatsAppMessage struct {
 						ButtonReply struct {
 							ID    string `json:"id"`
 							Title string `json:"title"`
-						}
+						} `json:"button_reply"`
 					}
 					Type string `json:"type"`
 				} `json:"messages"`
