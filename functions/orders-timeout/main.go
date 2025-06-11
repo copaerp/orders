@@ -36,8 +36,8 @@ func handler(ctx context.Context, request Request) error {
 
 	if request.Type == constants.ORDER_STATUS_TIMEOUT {
 
-		finishedAt := time.Now()
-		order.FinishedAt = &finishedAt
+		canceledAt := time.Now()
+		order.CanceledAt = &canceledAt
 		err = rdsClient.SaveOrder(&order)
 		if err != nil {
 			log.Printf("Error finishing order: %v", err)
