@@ -27,7 +27,7 @@ type WhatsAppTextBody struct {
 type WhatsAppInteractiveAction struct {
 	Button   *string                       `json:"button,omitempty"`
 	Sections *[]WhatsAppInteractiveSection `json:"sections,omitempty"`
-	Buttons  *[]WhatsAppInteractiveRow     `json:"buttons,omitempty"`
+	Buttons  *[]WhatsAppInteractiveButtons `json:"buttons,omitempty"`
 }
 
 type WhatsAppInteractiveSection struct {
@@ -35,8 +35,12 @@ type WhatsAppInteractiveSection struct {
 	Rows  []WhatsAppInteractiveRow `json:"rows"`
 }
 
+type WhatsAppInteractiveButtons struct {
+	Type  string                 `json:"type"`
+	Reply WhatsAppInteractiveRow `json:"reply"`
+}
+
 type WhatsAppInteractiveRow struct {
-	Type        *string `json:"type,omitempty"`
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`
 	Description *string `json:"description"`

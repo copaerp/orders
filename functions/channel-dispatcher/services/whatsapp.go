@@ -110,15 +110,15 @@ func (w *WhatsAppService) SendButtonMessage(from, to, message string, button map
 
 func (w *WhatsAppService) SendButtonsMessage(from, to, message string, buttons map[string]any) error {
 
-	rowType := "reply"
-
-	interactiveRows := []WhatsAppInteractiveRow{}
+	interactiveRows := []WhatsAppInteractiveButtons{}
 	for _, row := range buttons["rows"].([]any) {
 		rowMap := row.(map[string]any)
-		interactiveRows = append(interactiveRows, WhatsAppInteractiveRow{
-			Type:  &rowType,
-			ID:    rowMap["id"].(string),
-			Title: rowMap["title"].(string),
+		interactiveRows = append(interactiveRows, WhatsAppInteractiveButtons{
+			Type: "reply",
+			Reply: WhatsAppInteractiveRow{
+				ID:    rowMap["id"].(string),
+				Title: rowMap["title"].(string),
+			},
 		})
 	}
 	whatsAppMessage := WhatsAppMessage{
