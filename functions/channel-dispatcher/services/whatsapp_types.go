@@ -43,5 +43,5 @@ type WhatsAppInteractiveButtons struct {
 type WhatsAppInteractiveRow struct {
 	ID          string  `json:"id"`
 	Title       string  `json:"title"`
-	Description *string `json:"description"`
+	Description *string `json:"description,omitempty"`
 }
