@@ -63,3 +63,17 @@ func (c *OrdersRDSClient) GetOrder(orderID string) (entities.Order, error) {
 
 	return order, result.Error
 }
+
+// ListOrders returns all orders with basic associations preloaded.
+func (c *OrdersRDSClient) ListOrders() ([]entities.Order, error) {
+	var orders []entities.Order
+	result := c.DB.
+		Preload("Customer").
+		Preload("Unit").
+		Preload("Channel").
+		Find(&orders)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return orders, nil
+}

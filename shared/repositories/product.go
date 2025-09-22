@@ -32,3 +32,17 @@ func (c *OrdersRDSClient) GetOrderProducts(orderID uuid.UUID) ([]entities.Produc
 
 	return products, nil
 }
+
+// GetProductByID returns a single product with its associations.
+func (c *OrdersRDSClient) GetProductByID(productID string) (*entities.Product, error) {
+	var product entities.Product
+	err := c.DB.
+		Preload("Business").
+		Preload("ProductsInUnits").
+		Preload("ProductsOrders").
+		First(&product, "id = ?", productID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
