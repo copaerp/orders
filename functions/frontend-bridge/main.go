@@ -71,7 +71,7 @@ func main() {
 	// Criar router e registrar rotas
 	router = chi.NewRouter()
 
-	// Listar todos os pedidos
+	// Listar pedidos finalizados (finished_at != NULL)
 	router.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
 		orders, err := rdsClient.ListOrders()
 		if err != nil {

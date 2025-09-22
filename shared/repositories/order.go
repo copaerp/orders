@@ -71,6 +71,7 @@ func (c *OrdersRDSClient) ListOrders() ([]entities.Order, error) {
 		Preload("Customer").
 		Preload("Unit").
 		Preload("Channel").
+		Where("order.finished_at IS NOT NULL").
 		Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
