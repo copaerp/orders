@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -20,8 +21,10 @@ var router *chi.Mux
 
 // Lambda handler
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// Converter APIGatewayProxyRequest em http.Request
-	req, err := http.NewRequest(request.HTTPMethod, request.Path, bytes.NewBufferString(request.Body))
+	path := request.Path
+	path = strings.TrimPrefix(path, "/prod")
+
+	req, err := http.NewRequest(request.HTTPMethod, path, bytes.NewBufferString(request.Body))
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError}, err
 	}
@@ -68,10 +71,8 @@ func main() {
 		panic(err)
 	}
 
-	// Criar router e registrar rotas
 	router = chi.NewRouter()
 
-	// Listar pedidos finalizados (finished_at != NULL)
 	router.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
 		orders, err := rdsClient.ListOrders()
 		if err != nil {
@@ -87,12 +88,6 @@ func main() {
 		id := chi.URLParam(r, "id")
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Fetching order with ID: " + id))
-	})
-
-	router.Post("/orders", func(w http.ResponseWriter, r *http.Request) {
-		body, _ := io.ReadAll(r.Body)
-		w.WriteHeader(http.StatusCreated)
-		w.Write([]byte("Order created with body: " + string(body)))
 	})
 
 	// Buscar produto por ID
