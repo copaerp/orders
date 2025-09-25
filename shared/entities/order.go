@@ -9,25 +9,25 @@ import (
 )
 
 type Order struct {
-	ID            uuid.UUID `gorm:"type:char(36);primaryKey"`
-	CustomerID    uuid.UUID `gorm:"type:char(36);not null"`
-	UnitID        uuid.UUID `gorm:"type:char(36);not null"`
-	ChannelID     uuid.UUID `gorm:"type:char(36);not null"`
-	Status        string
-	Notes         *string
-	PaymentMethod *string
-	UsedMenu      []byte         `gorm:"type:blob;default:NULL"`
-	CurrentCart   datatypes.JSON `gorm:"type:json;default:NULL"`
-	LastMessageAt time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	FinishedAt    *time.Time
-	CanceledAt    *time.Time
+	ID            uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
+	CustomerID    uuid.UUID      `gorm:"type:char(36);not null" json:"customer_id"`
+	UnitID        uuid.UUID      `gorm:"type:char(36);not null" json:"unit_id"`
+	ChannelID     uuid.UUID      `gorm:"type:char(36);not null" json:"channel_id"`
+	Status        string         `json:"status"`
+	Notes         *string        `json:"notes,omitempty"`
+	PaymentMethod *string        `json:"payment_method,omitempty"`
+	UsedMenu      []byte         `gorm:"type:blob;default:NULL" json:"used_menu,omitempty"`
+	CurrentCart   datatypes.JSON `gorm:"type:json;default:NULL" json:"current_cart,omitempty"`
+	LastMessageAt time.Time      `json:"last_message_at"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	FinishedAt    *time.Time     `json:"finished_at,omitempty"`
+	CanceledAt    *time.Time     `json:"canceled_at,omitempty"`
 
-	Customer       *Customer `gorm:"foreignKey:CustomerID"`
-	Unit           *Unit     `gorm:"foreignKey:UnitID"`
-	Channel        *Channel  `gorm:"foreignKey:ChannelID"`
-	ProductsOrders []ProductOrder
+	Customer       *Customer      `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`
+	Unit           *Unit          `gorm:"foreignKey:UnitID" json:"unit,omitempty"`
+	Channel        *Channel       `gorm:"foreignKey:ChannelID" json:"channel,omitempty"`
+	ProductsOrders []ProductOrder `json:"products_orders,omitempty"`
 }
 
 func (o *Order) TableName() string {

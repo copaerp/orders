@@ -7,16 +7,16 @@ import (
 )
 
 type WhatsappNumber struct {
-	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
-	UnitID       uuid.UUID `gorm:"type:char(36);not null"`
-	Number       string
-	Description  string
-	MetaNumberID string
+	ID           uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
+	UnitID       uuid.UUID `gorm:"type:char(36);not null" json:"unit_id"`
+	Number       string    `json:"number"`
+	Description  string    `json:"description"`
+	MetaNumberID string    `json:"meta_number_id"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 
-	Unit *Unit `gorm:"foreignKey:UnitID"`
+	Unit *Unit `gorm:"foreignKey:UnitID" json:"unit,omitempty"`
 }
 
 func (w *WhatsappNumber) TableName() string {

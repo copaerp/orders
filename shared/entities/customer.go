@@ -7,19 +7,19 @@ import (
 )
 
 type Customer struct {
-	ID            uuid.UUID `gorm:"type:char(36);primaryKey"`
-	BusinessID    uuid.UUID `gorm:"type:char(36);not null"`
-	FullName      string
-	Phone         string
-	InstagramUser string
-	Email         string
-	Document      string
-	BirthDate     time.Time
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID            uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
+	BusinessID    uuid.UUID `gorm:"type:char(36);not null" json:"business_id"`
+	FullName      string    `json:"full_name"`
+	Phone         string    `json:"phone"`
+	InstagramUser string    `json:"instagram_user"`
+	Email         string    `json:"email"`
+	Document      string    `json:"document"`
+	BirthDate     time.Time `json:"birth_date"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 
-	Business *Business `gorm:"foreignKey:BusinessID"`
-	Orders   []Order
+	Business *Business `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
+	Orders   []Order   `json:"orders,omitempty"`
 }
 
 func (c *Customer) TableName() string {
