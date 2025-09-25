@@ -1,14 +1,13 @@
 name: frontend-bridge
 
 on:
-  # temporarily disabled
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - '.github/workflows/frontend-bridge.yml'
-  #     - 'functions/frontend-bridge/**'
-  #     - 'shared/**'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/frontend-bridge.yml'
+      - 'functions/frontend-bridge/**'
+      - 'shared/**'
   workflow_dispatch:
 
 jobs:
