@@ -14,6 +14,7 @@ import (
 	gorm_entities "github.com/copaerp/orders/shared/entities"
 	"github.com/copaerp/orders/shared/repositories"
 	"github.com/copaerp/orders/shared/services"
+	"github.com/copaerp/orders/shared/utils"
 	"github.com/google/uuid"
 )
 
@@ -99,6 +100,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 		order = &gorm_entities.Order{
 			ID:         uuid.New(),
+			DisplayID:  utils.GenerateDisplayID(),
 			CustomerID: customer.ID,
 			UnitID:     unit.ID,
 			ChannelID:  channelID,
