@@ -12,6 +12,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/copaerp/orders/shared/entities"
 	"github.com/copaerp/orders/shared/repositories"
 	"github.com/go-chi/chi/v5"
 )
@@ -83,6 +84,32 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(orders)
+	})
+
+	// Salvar um pedido completo
+	router.Post("/orders", func(w http.ResponseWriter, r *http.Request) {
+		var order entities.Order
+
+		// Decodificar o JSON do body
+		if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
+			log.Printf("error decoding order JSON: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_json"}`))
+			return
+		}
+
+		// Salvar o pedido usando o RDS client
+		if err := rdsClient.SaveOrder(&order); err != nil {
+			log.Printf("error saving order: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error":"save_failed"}`))
+			return
+		}
+
+		// Retornar sucesso com o pedido salvo
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(order)
 	})
 	router.Get("/orders/{id}", func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id")

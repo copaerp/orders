@@ -99,13 +99,14 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		}
 
 		order = &gorm_entities.Order{
-			ID:         uuid.New(),
-			DisplayID:  utils.GenerateDisplayID(),
-			CustomerID: customer.ID,
-			UnitID:     unit.ID,
-			ChannelID:  channelID,
-			Status:     constants.ORDER_STATUS_JUST_STARTED,
-			UsedMenu:   byteMenu,
+			ID:                 uuid.New(),
+			DisplayID:          utils.GenerateDisplayID(),
+			CustomerID:         customer.ID,
+			UnitID:             unit.ID,
+			ChannelID:          channelID,
+			Status:             constants.ORDER_STATUS_JUST_STARTED,
+			PostCheckoutStatus: constants.ORDER_POST_CHECKOUT_STATUS_CONFIRMED,
+			UsedMenu:           byteMenu,
 		}
 	}
 
