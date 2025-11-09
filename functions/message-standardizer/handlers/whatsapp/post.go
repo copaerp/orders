@@ -128,6 +128,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		"menu":                  menuAsMapArr,
 		"products":              order.CurrentCart,
 		"order_id":              strOrderID,
+		"display_id":            order.DisplayID,
 		"customer_id":           customer.ID.String(),
 		"unit_id":               unit.ID.String(),
 		"order_status":          order.Status,
