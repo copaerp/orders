@@ -46,3 +46,32 @@ func (c *OrdersRDSClient) GetProductByID(productID string) (*entities.Product, e
 	}
 	return &product, nil
 }
+
+// GetProductByIDAndBusinessID returns a single product filtering by business ID.
+func (c *OrdersRDSClient) GetProductByIDAndBusinessID(productID string, businessID uuid.UUID) (*entities.Product, error) {
+	var product entities.Product
+	err := c.DB.
+		Preload("Business").
+		Preload("ProductsInUnits").
+		Preload("ProductsOrders").
+		Where("id = ? AND business_id = ?", productID, businessID).
+		First(&product).Error
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
+
+// GetMenuByBusinessID returns all products (menu) for a specific business.
+func (c *OrdersRDSClient) GetMenuByBusinessID(businessID uuid.UUID) ([]entities.Product, error) {
+	var products []entities.Product
+	err := c.DB.
+		Preload("Business").
+		Where("business_id = ?", businessID).
+		Order("category ASC, name ASC").
+		Find(&products).Error
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
+}

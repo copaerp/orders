@@ -16,6 +16,7 @@ import (
 	"github.com/copaerp/orders/shared/repositories"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
 )
 
 var rdsClient *repositories.OrdersRDSClient
@@ -100,10 +101,21 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
-	router.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
-		orders, err := rdsClient.ListOrders()
+	router.Get("/orders/{businessId}", func(w http.ResponseWriter, r *http.Request) {
+		businessID := chi.URLParam(r, "businessId")
+
+		// Validar se o business ID é um UUID válido
+		businessUUID, err := uuid.Parse(businessID)
 		if err != nil {
-			log.Printf("error listing orders: %v", err)
+			log.Printf("invalid business ID format: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_business_id_format"}`))
+			return
+		}
+
+		orders, err := rdsClient.ListOrdersByBusinessID(businessUUID)
+		if err != nil {
+			log.Printf("error listing orders for business %s: %v", businessID, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(`{"error":"internal_error"}`))
 			return
@@ -113,7 +125,18 @@ func main() {
 	})
 
 	// Salvar um pedido completo
-	router.Post("/orders", func(w http.ResponseWriter, r *http.Request) {
+	router.Post("/orders/{businessId}", func(w http.ResponseWriter, r *http.Request) {
+		businessID := chi.URLParam(r, "businessId")
+
+		// Validar se o business ID é um UUID válido
+		businessUUID, err := uuid.Parse(businessID)
+		if err != nil {
+			log.Printf("invalid business ID format: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_business_id_format"}`))
+			return
+		}
+
 		var order entities.Order
 
 		// Decodificar o JSON do body
@@ -121,6 +144,14 @@ func main() {
 			log.Printf("error decoding order JSON: %v", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(`{"error":"invalid_json"}`))
+			return
+		}
+
+		// Validar se a unit do pedido pertence ao business
+		if err := rdsClient.ValidateUnitBelongsToBusiness(order.UnitID, businessUUID); err != nil {
+			log.Printf("unit %s does not belong to business %s: %v", order.UnitID, businessID, err)
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(`{"error":"unit_not_belongs_to_business"}`))
 			return
 		}
 
@@ -137,24 +168,79 @@ func main() {
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(order)
 	})
-	router.Get("/orders/{id}", func(w http.ResponseWriter, r *http.Request) {
+	router.Get("/orders/{businessId}/{id}", func(w http.ResponseWriter, r *http.Request) {
+		businessID := chi.URLParam(r, "businessId")
 		id := chi.URLParam(r, "id")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Fetching order with ID: " + id))
+
+		// Validar se o business ID é um UUID válido
+		businessUUID, err := uuid.Parse(businessID)
+		if err != nil {
+			log.Printf("invalid business ID format: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_business_id_format"}`))
+			return
+		}
+
+		order, err := rdsClient.GetOrderByIDAndBusinessID(id, businessUUID)
+		if err != nil {
+			log.Printf("error fetching order %s for business %s: %v", id, businessID, err)
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`{"error":"not_found"}`))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(order)
 	})
 
-	// Buscar produto por ID
-	router.Get("/products/{id}", func(w http.ResponseWriter, r *http.Request) {
+	// Buscar produto por ID e business ID
+	router.Get("/products/{businessId}/{id}", func(w http.ResponseWriter, r *http.Request) {
+		businessID := chi.URLParam(r, "businessId")
 		id := chi.URLParam(r, "id")
-		product, err := rdsClient.GetProductByID(id)
+
+		// Validar se o business ID é um UUID válido
+		businessUUID, err := uuid.Parse(businessID)
 		if err != nil {
-			log.Printf("error fetching product %s: %v", id, err)
+			log.Printf("invalid business ID format: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_business_id_format"}`))
+			return
+		}
+
+		product, err := rdsClient.GetProductByIDAndBusinessID(id, businessUUID)
+		if err != nil {
+			log.Printf("error fetching product %s for business %s: %v", id, businessID, err)
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte(`{"error":"not_found"}`))
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(product)
+	})
+
+	// Endpoint para buscar o cardápio (todos os produtos) de um business
+	router.Get("/menu/{businessId}", func(w http.ResponseWriter, r *http.Request) {
+		businessID := chi.URLParam(r, "businessId")
+
+		// Validar se o business ID é um UUID válido
+		businessUUID, err := uuid.Parse(businessID)
+		if err != nil {
+			log.Printf("invalid business ID format: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_business_id_format"}`))
+			return
+		}
+
+		products, err := rdsClient.GetMenuByBusinessID(businessUUID)
+		if err != nil {
+			log.Printf("error fetching menu for business %s: %v", businessID, err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error":"internal_error"}`))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(products)
 	})
 
 	lambda.Start(handler)
