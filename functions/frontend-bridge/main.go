@@ -15,10 +15,29 @@ import (
 	"github.com/copaerp/orders/shared/entities"
 	"github.com/copaerp/orders/shared/repositories"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 var rdsClient *repositories.OrdersRDSClient
 var router *chi.Mux
+
+// Middleware customizado para CORS
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Authorization, Content-Type, X-CSRF-Token")
+		w.Header().Set("Access-Control-Allow-Credentials", "false")
+
+		// Handle preflight OPTIONS request
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 // Lambda handler
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -73,6 +92,13 @@ func main() {
 	}
 
 	router = chi.NewRouter()
+
+	// Configurar CORS customizado
+	router.Use(corsMiddleware)
+
+	// Middleware básico
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
 
 	router.Get("/orders", func(w http.ResponseWriter, r *http.Request) {
 		orders, err := rdsClient.ListOrders()
