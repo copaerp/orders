@@ -22,16 +22,19 @@ if not is_running_in_lambda():
     load_env()
 
 # --- CONFIG IFOOD ---
-CLIENT_ID = os.getenv("IFOOD_CLIENT_ID")
-CLIENT_SECRET = os.getenv("IFOOD_CLIENT_SECRET")
+CLIENT_ID = os.getenv("ifood_client_id")
+CLIENT_SECRET = os.getenv("ifood_client_secret")
 
 # --- CONFIG BANCO ---
+db_endpoint = os.getenv("orders_db_endpoint", "localhost:3306")
+db_host, db_port = db_endpoint.split(":") if ":" in db_endpoint else (db_endpoint, "3306")
+
 DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "port": int(os.getenv("DB_PORT", "3306")),
-    "user": os.getenv("DB_USER", "root"),
-    "password": os.getenv("DB_PASS", ""),
-    "database": os.getenv("DB_NAME", "orders")
+    "host": db_host,
+    "port": int(db_port),
+    "user": os.getenv("orders_db_username", "root"),
+    "password": os.getenv("orders_db_password", ""),
+    "database": os.getenv("orders_db_name", "orders")
 }
 
 # ====================================================================
@@ -62,7 +65,7 @@ def get_access_token():
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     try:
-        r = requests.post(os.getenv("IFOOD_AUTH_URL"), data=data, headers=headers)
+        r = requests.post(os.getenv("ifood_auth_url"), data=data, headers=headers)
         r.raise_for_status()
         print("[OK] Autenticado no iFood.")
         return r.json()["accessToken"]
@@ -100,7 +103,7 @@ def map_order(order):
         "post_checkout_id": "confirmed",
         "customer_id": order.get("customer", {}).get("id"),
         "ifood_merchant_id": order.get("merchant", {}).get("id"),
-        "channel_id": os.getenv("IFOOD_CHANNEL_ID"),
+        "channel_id": os.getenv("ifood_channel_id"),
         "status": order.get("state"),
         "notes": order.get("extraInfo", {}).get("notes"),
         "payment_method": order.get("payment", {}).get("method"),
@@ -117,7 +120,7 @@ def map_order(order):
 def process_all_orders(token):
     headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
     try:
-        r = requests.get(os.getenv("IFOOD_EVENTS_URL"), headers=headers)
+        r = requests.get(os.getenv("ifood_events_url"), headers=headers)
         if r.status_code == 204:
             print("[INFO] Nenhum evento.")
             return []
@@ -136,7 +139,7 @@ def process_all_orders(token):
             continue
 
         try:
-            d = requests.get(os.getenv("IFOOD_ORDER_URL").format(order_id=oid), headers=headers)
+            d = requests.get(os.getenv("ifood_order_url").format(order_id=oid), headers=headers)
             d.raise_for_status()
             order_json = d.json()
             processed.append(map_order(order_json))
