@@ -257,7 +257,7 @@ def insert_orders(orders):
 
         cn.commit()
 
-if __name__ == "__main__":
+def lambda_handler():
     import traceback
     try:
         token = get_access_token()
@@ -267,3 +267,6 @@ if __name__ == "__main__":
             print("Finalizado.")
     except Exception:
         traceback.print_exc()
+
+if __name__ == "__main__":
+    lambda_handler()
