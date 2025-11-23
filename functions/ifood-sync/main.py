@@ -257,7 +257,7 @@ def insert_orders(orders):
 
         cn.commit()
 
-def lambda_handler():
+def lambda_handler(event=None, context=None):
     import traceback
     try:
         token = get_access_token()
@@ -265,8 +265,10 @@ def lambda_handler():
             pedidos = process_all_orders(token)
             insert_orders(pedidos)
             print("Finalizado.")
-    except Exception:
+        return {"statusCode": 200, "body": "Success"}
+    except Exception as e:
         traceback.print_exc()
+        return {"statusCode": 500, "body": str(e)}
 
 if __name__ == "__main__":
     lambda_handler()

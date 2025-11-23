@@ -1,0 +1,79 @@
+name: ifood-sync
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/ifood-sync.yml'
+      - 'functions/ifood-sync/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      FUNCTION_NAME: ifood-sync
+      LAYER_NAME: ifood-sync-dependencies
+      FUNCTION_ZIP: lambda_function.zip
+      LAYER_ZIP: layer.zip
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Build Lambda Layer
+        run: |
+          cd functions/ifood-sync
+          mkdir -p python
+          pip install -r requirements.txt -t python/ --platform manylinux2014_aarch64 --only-binary=:all:
+          zip -r ../../$LAYER_ZIP python/
+
+      - name: Build Lambda Function
+        run: |
+          cd functions/ifood-sync
+          zip ../../$FUNCTION_ZIP main.py
+          cd ../..
+          mv main.py lambda_function.py
+          zip -j $FUNCTION_ZIP functions/ifood-sync/main.py
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: "us-east-1"
+
+      - name: Deploy Lambda Layer
+        run: |
+          LAYER_VERSION=$(aws lambda publish-layer-version \
+            --layer-name $LAYER_NAME \
+            --zip-file fileb://$LAYER_ZIP \
+            --compatible-runtimes python3.13 \
+            --compatible-architectures arm64 \
+            --query 'Version' \
+            --output text)
+          echo "Published layer version: $LAYER_VERSION"
+          
+          # Update Lambda function to use new layer version
+          LAYER_ARN="arn:aws:lambda:us-east-1:$(aws sts get-caller-identity --query Account --output text):layer:$LAYER_NAME:$LAYER_VERSION"
+          aws lambda update-function-configuration \
+            --function-name $FUNCTION_NAME \
+            --layers $LAYER_ARN
+          
+          # Wait for update to complete
+          aws lambda wait function-updated \
+            --function-name $FUNCTION_NAME
+
+      - name: Deploy Lambda Function
+        run: |
+          aws lambda update-function-code \
+            --function-name $FUNCTION_NAME \
+            --zip-file fileb://$FUNCTION_ZIP
