@@ -9,11 +9,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/copaerp/orders/shared/entities"
 	"github.com/copaerp/orders/shared/repositories"
+	"github.com/copaerp/orders/shared/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
@@ -153,6 +155,23 @@ func main() {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte(`{"error":"unit_not_belongs_to_business"}`))
 			return
+		}
+
+		if order.ID == uuid.Nil {
+			order.ID = uuid.New()
+		}
+		if order.DisplayID == "" {
+			order.DisplayID = utils.GenerateDisplayID()
+		}
+		if order.CreatedAt.IsZero() {
+			order.CreatedAt = time.Now()
+		}
+		if order.UpdatedAt.IsZero() {
+			order.UpdatedAt = time.Now()
+		}
+		if order.FinishedAt != nil {
+			now := time.Now()
+			order.FinishedAt = &now
 		}
 
 		// Salvar o pedido usando o RDS client
