@@ -97,6 +97,22 @@ func (c *OrdersRDSClient) ListOrdersByBusinessID(businessID uuid.UUID) ([]entiti
 	return orders, nil
 }
 
+// ListOrdersByUnitID returns all orders for a specific unit with basic associations preloaded.
+func (c *OrdersRDSClient) ListOrdersByUnitID(unitID uuid.UUID) ([]entities.Order, error) {
+	var orders []entities.Order
+	result := c.DB.
+		Preload("Customer").
+		Preload("Unit").
+		Preload("Channel").
+		Where("order.unit_id = ?", unitID).
+		Where("order.finished_at IS NOT NULL").
+		Find(&orders)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return orders, nil
+}
+
 // GetOrderByIDAndBusinessID returns an order by ID filtering by business ID.
 func (c *OrdersRDSClient) GetOrderByIDAndBusinessID(orderID string, businessID uuid.UUID) (*entities.Order, error) {
 	var order entities.Order
@@ -108,6 +124,25 @@ func (c *OrdersRDSClient) GetOrderByIDAndBusinessID(orderID string, businessID u
 		Joins("JOIN unit ON unit.id = order.unit_id").
 		Where("order.id = ?", orderID).
 		Where("unit.business_id = ?", businessID).
+		First(&order)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &order, nil
+}
+
+// GetOrderByIDAndUnitID returns an order by ID filtering by unit ID.
+func (c *OrdersRDSClient) GetOrderByIDAndUnitID(orderID string, unitID uuid.UUID) (*entities.Order, error) {
+	var order entities.Order
+	result := c.DB.
+		Joins("Customer").
+		Joins("Unit").
+		Joins("Channel").
+		Joins("Unit.WhatsappNumber").
+		Where("order.id = ?", orderID).
+		Where("order.unit_id = ?", unitID).
 		First(&order)
 
 	if result.Error != nil {

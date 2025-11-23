@@ -75,3 +75,34 @@ func (c *OrdersRDSClient) GetMenuByBusinessID(businessID uuid.UUID) ([]entities.
 	}
 	return products, nil
 }
+
+// GetProductByIDAndUnitID returns a single product filtering by unit ID through product_in_unit.
+func (c *OrdersRDSClient) GetProductByIDAndUnitID(productID string, unitID uuid.UUID) (*entities.Product, error) {
+	var product entities.Product
+	err := c.DB.
+		Preload("Business").
+		Preload("ProductsInUnits").
+		Preload("ProductsOrders").
+		Joins("JOIN product_in_unit piu ON piu.product_id = product.id").
+		Where("product.id = ? AND piu.unit_id = ?", productID, unitID).
+		First(&product).Error
+	if err != nil {
+		return nil, err
+	}
+	return &product, nil
+}
+
+// GetMenuByUnitID returns all products (menu) for a specific unit through product_in_unit.
+func (c *OrdersRDSClient) GetMenuByUnitID(unitID uuid.UUID) ([]entities.Product, error) {
+	var products []entities.Product
+	err := c.DB.
+		Preload("Business").
+		Joins("JOIN product_in_unit piu ON piu.product_id = product.id").
+		Where("piu.unit_id = ?", unitID).
+		Order("product.category ASC, product.name ASC").
+		Find(&products).Error
+	if err != nil {
+		return nil, err
+	}
+	return products, nil
+}
