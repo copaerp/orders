@@ -38,10 +38,8 @@ jobs:
       - name: Build Lambda Function
         run: |
           cd functions/ifood-sync
-          zip ../../$FUNCTION_ZIP main.py
-          cd ../..
-          mv main.py lambda_function.py
-          zip -j $FUNCTION_ZIP functions/ifood-sync/main.py
+          cp main.py lambda_function.py
+          zip ../../$FUNCTION_ZIP lambda_function.py
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
