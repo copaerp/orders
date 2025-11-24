@@ -125,18 +125,21 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 
 	strOrderID := order.ID.String()
 	n8nMessage := map[string]any{
-		"message":               message,
-		"menu":                  menuAsMapArr,
-		"products":              order.CurrentCart,
-		"order_id":              strOrderID,
-		"display_id":            order.DisplayID,
-		"customer_id":           customer.ID.String(),
-		"unit_id":               unit.ID.String(),
-		"order_status":          order.Status,
-		"order_last_message_at": order.LastMessageAt.Format(time.RFC3339),
+		"message":                     message,
+		"menu":                        menuAsMapArr,
+		"products":                    order.CurrentCart,
+		"order_id":                    strOrderID,
+		"display_id":                  order.DisplayID,
+		"customer_id":                 customer.ID.String(),
+		"unit_id":                     unit.ID.String(),
+		"order_status":                order.Status,
+		"order_last_message_at":       order.LastMessageAt.Format(time.RFC3339),
+		"misunderstood_message_count": order.MisunderstoodMessageCount,
 	}
 
-	services.NewN8NClient().Post("new_message", n8nMessage)
+	if !order.EscalatedToHuman {
+		services.NewN8NClient().Post("new_message", n8nMessage)
+	}
 
 	eventBridgePayload := map[string]any{
 		"order_id": strOrderID,

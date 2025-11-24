@@ -46,8 +46,9 @@ func handler(ctx context.Context, request Request) error {
 	}
 
 	services.NewN8NClient().Post("order_timeout", map[string]any{
-		"order_id": request.OrderID,
-		"type":     request.Type,
+		"order_id":           request.OrderID,
+		"type":               request.Type,
+		"escalated_to_human": order.EscalatedToHuman,
 	})
 
 	return nil
