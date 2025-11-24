@@ -18,8 +18,11 @@ type Order struct {
 	PostCheckoutStatus string         `json:"post_checkout_status"`
 	Notes              *string        `json:"notes,omitempty"`
 	PaymentMethod      *string        `json:"payment_method,omitempty"`
+	Address            *string        `gorm:"type:varchar(255)" json:"address,omitempty"`
 	UsedMenu           []byte         `gorm:"type:blob;default:NULL" json:"used_menu,omitempty"`
 	CurrentCart        datatypes.JSON `gorm:"type:json;default:NULL" json:"current_cart,omitempty"`
+	IfoodID            *uuid.UUID     `gorm:"type:char(36);column:ifood_id" json:"ifood_id,omitempty"`
+	TableName          *string        `gorm:"type:char(100);column:table_name" json:"table_name,omitempty"`
 	LastMessageAt      time.Time      `json:"last_message_at"`
 	CreatedAt          time.Time      `json:"created_at"`
 	UpdatedAt          time.Time      `json:"updated_at"`
@@ -30,10 +33,6 @@ type Order struct {
 	Unit           *Unit          `gorm:"foreignKey:UnitID" json:"unit,omitempty"`
 	Channel        *Channel       `gorm:"foreignKey:ChannelID" json:"channel,omitempty"`
 	ProductsOrders []ProductOrder `json:"products_orders,omitempty"`
-}
-
-func (o *Order) TableName() string {
-	return "order"
 }
 
 func (o *Order) GetMenuAsMapArr() ([]map[string]string, error) {
