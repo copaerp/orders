@@ -101,7 +101,7 @@ func Post(ctx context.Context, request events.APIGatewayProxyRequest, rdsClient 
 		order = &gorm_entities.Order{
 			ID:                 uuid.New(),
 			DisplayID:          utils.GenerateDisplayID(),
-			CustomerID:         customer.ID,
+			CustomerID:         &customer.ID,
 			UnitID:             unit.ID,
 			ChannelID:          channelID,
 			Status:             constants.ORDER_STATUS_JUST_STARTED,

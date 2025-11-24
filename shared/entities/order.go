@@ -11,7 +11,7 @@ import (
 type Order struct {
 	ID                 uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
 	DisplayID          string         `gorm:"type:varchar(12);not null" json:"display_id"`
-	CustomerID         uuid.UUID      `gorm:"type:char(36);not null" json:"customer_id"`
+	CustomerID         *uuid.UUID     `gorm:"type:char(36)" json:"customer_id"`
 	UnitID             uuid.UUID      `gorm:"type:char(36);not null" json:"unit_id"`
 	ChannelID          uuid.UUID      `gorm:"type:char(36);not null" json:"channel_id"`
 	Status             string         `json:"status"`
