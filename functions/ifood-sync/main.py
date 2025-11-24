@@ -97,6 +97,27 @@ def map_order(order):
     items = order.get("items", [])
     simplified = [{"name": i.get("name"), "quantity": i.get("quantity")} for i in items]
 
+    # Extrair endereço de entrega
+    delivery = order.get("delivery", {})
+    delivery_address = delivery.get("deliveryAddress", {})
+    address_parts = []
+    if delivery_address.get("streetName"):
+        address_parts.append(delivery_address.get("streetName"))
+    if delivery_address.get("streetNumber"):
+        address_parts.append(delivery_address.get("streetNumber"))
+    if delivery_address.get("complement"):
+        address_parts.append(delivery_address.get("complement"))
+    if delivery_address.get("neighborhood"):
+        address_parts.append(delivery_address.get("neighborhood"))
+    if delivery_address.get("city"):
+        address_parts.append(delivery_address.get("city"))
+    if delivery_address.get("state"):
+        address_parts.append(delivery_address.get("state"))
+    if delivery_address.get("postalCode"):
+        address_parts.append(f"CEP: {delivery_address.get('postalCode')}")
+    
+    full_address = ", ".join(address_parts) if address_parts else None
+
     return {
         "id": order.get("id"),
         "display_id": generate_display_id(),
@@ -106,8 +127,9 @@ def map_order(order):
         "channel_id": os.getenv("ifood_channel_id"),
         "status": order.get("state"),
         "notes": order.get("extraInfo", {}).get("notes"),
-        "payment_method": order.get("payment", {}).get("method"),
+        "payment_method": "iFood",
         "current_cart": json.dumps(simplified, ensure_ascii=False),
+        "address": full_address,
         "finished_at": None,
         "canceled_at": None,
         "raw_json": json.dumps(order, ensure_ascii=False),
@@ -180,17 +202,18 @@ def insert_or_update_order(cur, data):
     q = """
         INSERT INTO `order`
         (id, display_id, customer_id, unit_id, channel_id, status, notes, payment_method,
-         current_cart, finished_at)
+         current_cart, address, finished_at)
         VALUES
-        (%s,%s,%s,%s,%s,%s,%s,%s,%s,CURRENT_TIMESTAMP)
+        (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,CURRENT_TIMESTAMP)
         ON DUPLICATE KEY UPDATE
             status=VALUES(status),
             current_cart=VALUES(current_cart),
+            address=VALUES(address),
             finished_at=VALUES(finished_at)
     """
     cur.execute(q, (
         data["id"], data["display_id"], data["customer_id"], data["unit_id"], data["channel_id"],
-        data["status"], data["notes"], data["payment_method"], data["current_cart"]
+        data["status"], data["notes"], data["payment_method"], data["current_cart"], data["address"]
     ))
 
 # ====================================================================
