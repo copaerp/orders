@@ -41,7 +41,6 @@ func (c *OrdersRDSClient) GetActiveOrderByCustomerAndSender(customerID, unitID u
 		Where("Customer.id = ?", customerID).
 		Where("Unit.id = ?", unitID).
 		Where("order.finished_at IS NULL").
-		Where("order.canceled_at IS NULL").
 		Find(&orders)
 
 	if result.Error != nil {
@@ -73,6 +72,7 @@ func (c *OrdersRDSClient) ListOrders() ([]entities.Order, error) {
 		Preload("Unit").
 		Preload("Channel").
 		Where("order.finished_at IS NOT NULL").
+		Where("order.canceled_at IS NULL").
 		Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
@@ -90,6 +90,7 @@ func (c *OrdersRDSClient) ListOrdersByBusinessID(businessID uuid.UUID) ([]entiti
 		Joins("JOIN unit ON unit.id = order.unit_id").
 		Where("unit.business_id = ?", businessID).
 		Where("order.finished_at IS NOT NULL").
+		Where("order.canceled_at IS NULL").
 		Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
@@ -106,6 +107,7 @@ func (c *OrdersRDSClient) ListOrdersByUnitID(unitID uuid.UUID) ([]entities.Order
 		Preload("Channel").
 		Where("order.unit_id = ?", unitID).
 		Where("order.finished_at IS NOT NULL").
+		Where("order.canceled_at IS NULL").
 		Find(&orders)
 	if result.Error != nil {
 		return nil, result.Error
