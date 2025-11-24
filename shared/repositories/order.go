@@ -169,3 +169,19 @@ func (c *OrdersRDSClient) ValidateUnitBelongsToBusiness(unitID, businessID uuid.
 
 	return nil
 }
+
+// ListEscalatedOrdersByUnitID returns all orders with escalated_to_human = true for a specific unit.
+func (c *OrdersRDSClient) ListEscalatedOrdersByUnitID(unitID uuid.UUID) ([]entities.Order, error) {
+	var orders []entities.Order
+	result := c.DB.
+		Preload("Customer").
+		Preload("Unit").
+		Preload("Channel").
+		Where("order.unit_id = ?", unitID).
+		Where("order.escalated_to_human = ?", true).
+		Find(&orders)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return orders, nil
+}

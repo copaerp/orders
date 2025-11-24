@@ -257,5 +257,30 @@ func main() {
 		json.NewEncoder(w).Encode(products)
 	})
 
+	// Endpoint para buscar pedidos escalados (escalated_to_human = true)
+	router.Get("/alerts/{unitId}", func(w http.ResponseWriter, r *http.Request) {
+		unitID := chi.URLParam(r, "unitId")
+
+		// Validar se o unit ID é um UUID válido
+		unitUUID, err := uuid.Parse(unitID)
+		if err != nil {
+			log.Printf("invalid unit ID format: %v", err)
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte(`{"error":"invalid_unit_id_format"}`))
+			return
+		}
+
+		orders, err := rdsClient.ListEscalatedOrdersByUnitID(unitUUID)
+		if err != nil {
+			log.Printf("error fetching escalated orders for unit %s: %v", unitID, err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error":"internal_error"}`))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(orders)
+	})
+
 	lambda.Start(handler)
 }
