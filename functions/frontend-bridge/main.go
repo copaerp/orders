@@ -164,7 +164,7 @@ func main() {
 		if order.UpdatedAt.IsZero() {
 			order.UpdatedAt = time.Now()
 		}
-		if order.FinishedAt != nil {
+		if order.FinishedAt == nil || order.FinishedAt.IsZero() {
 			now := time.Now()
 			order.FinishedAt = &now
 		}
